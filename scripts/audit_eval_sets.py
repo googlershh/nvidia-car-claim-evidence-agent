@@ -194,10 +194,47 @@ def audit_synth(raw_videos: dict[str, dict]) -> None:
     check(route_ok, "expected route follows the stated rule from raw amounts")
 
 
+def audit_leakage() -> None:
+    print("\n[4] train/eval leakage (TL labels)")
+    tl_zips = sorted((RAW / "597").rglob("TL_*_영상_*.zip"))
+    if not tl_zips:
+        print("  SKIP no TL label zips (download_aihub.py --stage 1)")
+        return
+    tl: dict[str, str] = {}
+    for path in tl_zips:
+        with zipfile.ZipFile(path) as z:
+            for name in z.namelist():
+                if name.endswith(".json"):
+                    v = json.loads(z.read(name).decode("utf-8-sig"))["video"]
+                    tl[v["video_name"]] = path.stem.split("_영상_")[1]
+    names = [r["video_name"] for r in csv.DictReader((ROOT / "data" / "manifests" / "eval_fault.csv").open(encoding="utf-8"))]
+    check(not set(names) & set(tl), f"no eval video name in TL ({len(tl)} TL labels)")
+    # names are bb_<pov>_<date>_vehicle_<source>_<seq>; same date+source can hold unrelated accidents
+    stem = lambda n: n.rsplit("_", 1)[0]  # noqa: E731
+    shared = [n for n in names if stem(n) in {stem(t) for t in tl}]
+    print(f"       eval videos sharing date+source prefix with a TL clip: {len(shared)} {shared[:5]}")
+
+
+def audit_media() -> None:
+    print("\n[5] extracted media")
+    media = ROOT / "data" / "interim" / "media"
+    if not media.exists():
+        print("  SKIP no data/interim/media (scripts/extract_media.py)")
+        return
+    names = [r["video_name"] for r in csv.DictReader((ROOT / "data" / "manifests" / "eval_fault.csv").open(encoding="utf-8"))]
+    videos = {p.stem: p for p in (media / "videos").glob("*")}
+    check(all(n in videos and videos[n].stat().st_size > 0 for n in names), f"all {len(names)} eval videos extracted")
+    images = {img for line in (INTERIM / "synth_cases.jsonl").open(encoding="utf-8") for img in json.loads(line)["images"]}
+    have = {p.name for p in (media / "images").glob("*") if p.stat().st_size > 0}
+    check(images <= have, f"all {len(images)} synthetic-case images extracted (missing {sorted(images - have)[:3]})")
+
+
 def main() -> None:
     raw = raw_video_labels()
     audit_fault_set(raw)
     audit_synth(raw)
+    audit_leakage()
+    audit_media()
     print(f"\n{'ALL CHECKS PASSED' if not failures else f'{len(failures)} FAILED'}")
     sys.exit(1 if failures else 0)
 

@@ -2,6 +2,9 @@ stage,dataset_key,file_key,filename,size,split,purpose
 1,597,509420,VL_차대차_영상_직선도로.zip,695 KB,Validation,video labels (straight road)
 1,597,509418,VL_차대차_영상_사거리교차로(신호등있음).zip,224 KB,Validation,video labels (signalized 4-way)
 1,597,509415,VL_차대차_영상_T자형교차로.zip,119 KB,Validation,video labels (T-junction)
+1,597,509327,TL_차대차_영상_직선도로.zip,6 MB,Training,train labels (leakage check)
+1,597,509325,TL_차대차_영상_사거리교차로(신호등있음).zip,2 MB,Training,train labels (leakage check)
+1,597,509322,TL_차대차_영상_T자형교차로.zip,790 KB,Training,train labels (leakage check)
 1,581,34371,VL_damage.zip,35 MB,Validation,damage labels (COCO-like)
 1,581,66515,TS_99. 붙임_견적서.zip,142 MB,Training,repair estimates (json; links to damage labels by category_id)
 1,71958,568003,VL_01.시뮬레이션 데이터_02.도심로.zip,11 MB,Validation,simulation labels (urban) - locate meta XML
@@ -14,4 +17,4 @@ meta,71958,567974,Other.zip,2 GB,Other,simulation metadata XML (800) + 3D assets
 2,597,509463,VS_차대차_영상_사거리교차로(신호등있음).zip,2 GB,Validation,eval videos (signalized 4-way)
 2,597,509460,VS_차대차_영상_T자형교차로.zip,1 GB,Validation,eval videos (T-junction)
 3,581,34369,VS_damage.zip,4 GB,Validation,damage images
-3,581,34370,VS_damage_part.zip,2 GB,Validation,damage part images
+4,581,34370,VS_damage_part.zip,2 GB,Validation,damage part images
