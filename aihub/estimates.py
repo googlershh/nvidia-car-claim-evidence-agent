@@ -61,11 +61,31 @@ class Estimate:
     items: list[EstimateItem] = field(default_factory=list)
 
     @property
-    def has_adjustment(self) -> bool:
-        return any(
-            it.approved_labor != it.claimed_labor or it.approved_part != it.claimed_part
-            for it in self.items if self.source == "sc"
+    def pre_amounts_complete(self) -> bool:
+        """False when some sc- item has an approved amount but a blank claimed one (7% of sc-).
+
+        Those estimates show 청구액 == 지급액, i.e. the pre-adjustment column was
+        simply not filled, so claimed totals cannot be rebuilt from items.
+        """
+        if self.source != "sc":
+            return True
+        return not any(
+            (it.claimed_labor is None and it.approved_labor) or (it.claimed_part is None and it.approved_part)
+            for it in self.items
         )
+
+    @property
+    def has_adjustment(self) -> bool:
+        """An sc- item was disallowed or its amount changed (both amounts present)."""
+        if self.source != "sc":
+            return False
+        for it in self.items:
+            if it.work == "불인정" and (it.claimed_labor or it.claimed_part):
+                return True
+            for pre, post in ((it.claimed_labor, it.approved_labor), (it.claimed_part, it.approved_part)):
+                if pre is not None and post is not None and pre != post:
+                    return True
+        return False
 
 
 def _int(v) -> int | None:

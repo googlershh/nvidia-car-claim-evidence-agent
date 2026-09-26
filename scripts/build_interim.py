@@ -88,13 +88,15 @@ def build_estimates() -> set[str]:
     for est in estimates.iter_estimates():
         d = dataclasses.asdict(est)
         its = d.pop("items")
-        headers.append({**d, "n_items": len(its), "has_adjustment": est.has_adjustment})
+        headers.append({**d, "n_items": len(its), "has_adjustment": est.has_adjustment,
+                        "pre_amounts_complete": est.pre_amounts_complete})
         items.extend({"estimate_id": est.estimate_id, **it} for it in its)
     write_csv("estimates.csv", headers)
     write_csv("estimate_items.csv", items)
     sc = [h for h in headers if h["source"] == "sc"]
     print(f"[estimates] {len(headers)} estimates, {len(items)} items; source {Counter(h['source'] for h in headers)}")
     print(f"            sc with adjustment {sum(h['has_adjustment'] for h in sc)}/{len(sc)}; "
+          f"sc with complete pre-adjustment amounts {sum(h['pre_amounts_complete'] for h in sc)}/{len(sc)}; "
           f"sc claimed-paid gap total {sum((h['claimed_total'] or 0) - (h['total'] or 0) for h in sc):,} won")
     return {h["estimate_id"] for h in headers}
 

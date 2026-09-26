@@ -6,8 +6,9 @@ Two label sets share the format:
   4 = most severe, inferred from exchange rates; the manual does not say)
 
 `categories.id` is the accident ID (manual: "사고 ID") and equals the repair
-estimate file name (e.g. `as-0000043`). `repair` is an image-level list shared
-by all annotations, formatted "Front bumper:coating,exchange".
+estimate file name (e.g. `as-0000043`). `repair` entries look like
+"Front bumper:coating,exchange"; they are merged over an image's annotations
+(a list in `damage`, sometimes a bare string in `damage_part`).
 Segmentation polygons are dropped to keep the parsed records small.
 """
 
@@ -44,9 +45,14 @@ class DamageImage:
     annotations: list[Annotation] = field(default_factory=list)
 
 
-def parse_repair(items: list[str]) -> dict[str, list[str]]:
-    out: dict[str, list[str]] = {}
+def parse_repair(items: list[str] | str | None, out: dict[str, list[str]] | None = None) -> dict[str, list[str]]:
+    """Merge "Part:method,method" entries into `out`. Some damage_part files store one string, not a list."""
+    out = {} if out is None else out
+    if isinstance(items, str):
+        items = [items]
     for item in items or []:
+        if ":" not in item:
+            continue
         part, _, methods = item.partition(":")
         out.setdefault(part.strip(), [])
         for m in methods.split(","):
@@ -59,6 +65,9 @@ def parse_record(doc: dict, label_set: str) -> DamageImage:
     anns = doc.get("annotations", [])
     first = anns[0] if anns else {}
     image = doc["images"]
+    repair: dict[str, list[str]] = {}
+    for a in anns:
+        parse_repair(a.get("repair"), repair)
     return DamageImage(
         image_file=image["file_name"],
         label_set=label_set,
@@ -69,7 +78,7 @@ def parse_record(doc: dict, label_set: str) -> DamageImage:
         color=first.get("color"),
         width=image.get("width"),
         height=image.get("height"),
-        repair=parse_repair(first.get("repair", [])),
+        repair=repair,
         annotations=[
             Annotation(a.get("damage"), a.get("part"), a.get("level"), a.get("bbox", []), a.get("area", 0.0))
             for a in anns

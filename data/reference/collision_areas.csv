@@ -1,0 +1,85 @@
+code,a_areas,b_areas,confidence,note
+0,front,rear,high,A rear-ends B (B already in a first collision)
+1,front,rear,high,A rear-ends B
+2,rear,front,high,B rear-ends parked/stopped A
+3,front;left;right,front;left;right,low,merge side contact; side depends on merge direction
+4,front;left;right,left;right,low,A hits B's open door
+5,front,front,high,head-on (B crosses centre line)
+6,front;left,front;left,medium,opposite-direction pass on narrow road; left sides touch
+7,front;left,front;right,medium,B overtakes A over solid centre line
+8,front;left,front;right,medium,B overtakes A at close range
+9,front;left;right,front;left;right,low,both overtaking over centre line
+10,front;right,front;left,medium,A overtakes B over solid line
+11,front,left;right;rear,medium,B changes lane in front of A; A front hits B's side or rear corner
+12,front;left;right,front;left;right,low,simultaneous lane change
+13,front;left;right,left;right,medium,A cuts out of a queued lane into B's side
+14,front,left;right;rear,medium,B changes lane in front of A (safety zone)
+15,front,left;right;rear,medium,B changes lane in front of A (safety zone)
+16,front;left,front;right,medium,A pulls out while B overtakes on A's left
+17,front;left,front;left,low,emergency vehicle left of centre line
+18,front,left;right;rear,medium,emergency vehicle B changes lane in front of A
+19,front;left,front;right,medium,emergency vehicle B overtakes A
+20,left;right;rear,front,medium,A changes lane in front of emergency vehicle B
+60,front;left;right,front;left;right,low,crossing from the side; striker unknown
+61,front;left;right,front;left;right,low,crossing from the side
+62,front;left;right,front;left;right,low,crossing from the side
+63,front;left;right,front;left;right,low,crossing from the side
+64,front;left;right,front;left;right,low,crossing from the side (B turning left)
+65,front;left;right,front;left;right,low,crossing from the side
+66,front;left;right,front;left;right,low,crossing from the side (B turning left)
+67,front;left;right,front;left;right,low,crossing from the side (B turning left)
+68,front;left;right,front;left;right,low,crossing from the side (B turning left)
+69,front;left;right,front;left;right,low,crossing from the side (A turning left)
+70,front;left;right,front;left;right,low,crossing from the side (A turning left)
+71,front,front;right,medium,A straight vs oncoming B turning left
+72,front,front;right,medium,A straight vs oncoming B turning left
+73,front,front;right,medium,A straight vs oncoming B turning left
+74,front,front;right,medium,A straight vs oncoming B turning left
+75,front,front;right,medium,A straight vs oncoming B turning left
+76,front;right,front,medium,A turning left vs oncoming B straight
+77,front;right,front,medium,A turning left vs oncoming B straight
+78,front;left;right,front;left;right,low,A left turn vs oncoming B right turn into the same road
+79,front;right,front,medium,A unprotected left turn vs oncoming B straight
+80,front;left;right,front;left;right,low,signal on one approach only; crossing
+81,front;left;right,front;left;right,low,signal on one approach only; crossing
+82,front;left;right,front;left;right,low,signal on one approach only; crossing
+83,front;left;right,front;left;right,low,signal on one approach only; A right turn
+84,front;left;right,front;left;right,low,signal on one approach only; A right turn
+85,front;left;right,front;left;right,low,signal on one approach only; A right turn
+86,front;left;right,front;left;right,low,signal on one approach only; A left turn
+87,front;left;right,front;left;right,low,signal on one approach only; A left turn
+88,front;left;right,front;left;right,low,signal on one approach only; A left turn
+89,front;left;right,front;left;right,low,A changes lane inside the intersection vs B right turn
+90,front;right,front;left,medium,A overtakes over centre line vs B turning left
+91,front,front;left;right,medium,A straight vs B U-turn
+92,front,front;left;right,medium,A straight vs B U-turn on signal
+93,front;left;right,front;left;right,low,A right turn vs B U-turn
+94,front;left;right,front;left;right,low,A right turn vs B U-turn
+95,left;right;rear,front,medium,B's sudden U-turn hits A's U-turn from behind
+96,left;right;rear,front,medium,simultaneous U-turn; B trailing
+97,front;left,front;right,medium,A pulls out while B overtakes
+98,front;left;right,front;left;right,low,road marking violation; turning conflict
+99,front,left;right;rear,medium,A trailing straight vs B leading left turn
+100,front;left;right,front;left;right,low,road marking violation; turning conflict
+101,front;right,front;left,medium,A overtaking right turn vs B straight in the right lane
+102,left;right;rear,front,medium,A leading right turn vs B trailing straight
+103,front;left;right,front;left;right,low,emergency vehicle crossing on red
+104,front;left;right,front;left;right,low,emergency vehicle left of centre line vs A left turn
+105,front;left;right,front;left;right,low,emergency vehicle left of centre line vs A U-turn
+106,front;left;right,front;left;right,low,T-junction
+107,front;left;right,front;left;right,low,T-junction
+108,front;left;right,front;left;right,low,T-junction
+109,front;left;right,front;left;right,low,T-junction
+110,front;left;right,front;left;right,low,T-junction
+111,front;left;right,front;left;right,low,T-junction
+112,front;left;right,front;left;right,low,T-junction
+113,front;left;right,front;left;right,low,T-junction
+114,front;left;right,front;left;right,low,T-junction
+115,front;left;right,front;left;right,low,T-junction
+116,front;left;right,front;left;right,low,T-junction
+117,front;left;right,front;left;right,low,T-junction
+118,front;left;right,front;left;right,low,T-junction
+119,front;left;right,front;left;right,low,T-junction
+120,front;left;right,front;left;right,low,T-junction
+121,front;left;right,front;left;right,low,T-junction
+122,front;left;right,front;left;right,low,T-junction
