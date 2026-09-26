@@ -1,0 +1,22 @@
+# AI Hub original data: never commit (redistribution may be restricted)
+data/raw/
+data/interim/
+*.zip
+*.zip.part*
+*.tar
+
+# Python
+.venv/
+__pycache__/
+*.pyc
+.pytest_cache/
+
+# Secrets
+.env
+*.key
+
+# OS / editor
+.DS_Store
+Thumbs.db
+.vscode/
+.idea/
