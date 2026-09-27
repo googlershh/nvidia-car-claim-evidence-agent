@@ -8,6 +8,8 @@ NVIDIA Agentic AI Hackathon(Creative Use-case 트랙) 출품작.
 
 @docs/HANDOFF.md
 
+해커톤이 지향하는 바, 채점 항목, build.nvidia.com 재료(API·SKILL·NemoClaw/OpenShell), 주제 무관 가이드는 `docs/HACKATHON_ESSENCE.md`에 압축해 두었다. 방향을 정하거나 주제를 바꿀 때 먼저 읽을 것.
+
 ## 작업 규칙
 
 - 언어: 사용자와의 대화와 문서는 한국어. 코드 식별자와 커밋 메시지는 영어.
