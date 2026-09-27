@@ -91,6 +91,25 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 
 해커톤 첫날 각 NIM·마이크로서비스 실제 가용성부터 확인할 것.
 
+### 5.1 build.nvidia.com 확인 결과 (2026-09-27, 공개 페이지·모델 카드)
+카탈로그: 모델 97개(무료 엔드포인트 38), 블루프린트 33개, 공식 에이전트 스킬 382개. 호스팅 API는 OpenAI 호환 `integrate.api.nvidia.com/v1/chat/completions`, API 키는 사용자 계정에서 발급. 요청 한도·크레딧 정책은 공개 페이지에서 찾지 못했다(`/faq` 404) → 키 발급 후 확인.
+
+| 역할 | 후보 모델 | 무료 API | 한국어 | 메모 |
+|---|---|---|---|---|
+| 영상·사진 이해 | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` | O (+다운로드) | **X (English only)** | 영상 mp4 최대 2분, 1080p는 1FPS/128프레임까지, 256K 컨텍스트, JSON 출력·도구 호출·추론 on/off(`enable_thinking`). 호스팅 API도 `video_url`에 base64 인라인(mp4/mov/webm). DGX Spark(GB10, 128GB 통합메모리) 지원: `--gpu-memory-utilization 0.70 --max-model-len 32768` 권장. vLLM은 기본 ~32프레임이므로 `--media-io-kwargs '{"video":{"fps":2,"num_frames":256}}'` 지정 |
+| 영상 물리 추론(보조) | `nvidia/cosmos3-nano-reasoner` | O | 명시 없음 | 텍스트+영상/이미지, 영상 4fps 권장. 신호·진행방향 판정 교차검증 후보 |
+| 계획·과실 추론·사정서 작성 | `nvidia/nemotron-3-ultra-550b-a55b` | O | **O** | 1M 컨텍스트, 도구 호출. 한국어 공식 지원은 Nemotron 3 계열 중 Ultra뿐 |
+| (대안) 경량 에이전트 | `nemotron-3-super-120b-a12b`, `nemotron-3.5-lightning-30b-a3b` | O | X | 영어·유럽어·일본어(·중국어)만 |
+| 인정기준 RAG 임베딩 | `nvidia/nemotron-3-embed-1b` | O | O | 다국어·교차언어 검색 |
+| 리랭크 | `llama-nemotron-rerank-vl-1b-v2` | X(다운로드만) | 명시 없음 | 텍스트 전용 리랭커는 카탈로그에 없음 |
+| OCR(견적서 스캔 데모 시) | `nemotron-ocr-v2` | X(다운로드만) | O | AI Hub 견적서는 JSON이라 필수 아님 |
+| 가드레일 | `nemotron-3.5-content-safety` | O | 명시 없음(다국어) | `nemoguard-jailbreak-detect`는 다운로드만 |
+| 번역 | `riva-translate-4b-instruct-v2` | O | O | Omni 영어 출력 → 한국어 변환 경로 대안 |
+
+- 블루프린트: **Video Search and Summarization(VSS) Agent**, RAG Blueprint(NeMo Retriever + Nemotron), NVIDIA Deep Researcher(AI-Q), **NemoClaw for OpenClaw**(4절의 OpenShell 샌드박스 시연 근거).
+- 스킬: `vss-summarize-video`, `vss-ask-video`, `nemo-retriever`, `nemo-retriever-mcp`, `rag-eval`, `nemoclaw-user-guide`, `nemotron-policy-generator`, `data-designer` 등. 라이브러리 필터에 NeMo Agent Toolkit(2), NemoClaw(1), 신뢰할 수 있는 AI(1).
+- **설계 영향**: 영상 모델(Omni)은 영어 전용이므로 영상 분석 프롬프트와 출력(JSON)은 영어로 하고, 한국어가 필요한 단계(견적 항목 해석, 인정기준 검색, 사정서 작성)는 Ultra + 한국어 임베딩이 맡는다. Omni의 한국어 이해 품질은 11절 리스크대로 샘플로 먼저 검증.
+
 ## 6. 데이터
 
 ### 6.1 승인 완료 (2026-09-27, 사용자 계정)
