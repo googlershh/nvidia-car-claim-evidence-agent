@@ -1,7 +1,8 @@
 """Minimal client for NVIDIA hosted NIM endpoints (OpenAI-compatible), stdlib only.
 
 Guards against surprise usage:
-- only calls https://integrate.api.nvidia.com (free endpoints), never partner endpoints
+- calls https://integrate.api.nvidia.com by default (or a self-hosted `base_url`),
+  never partner endpoints
 - a per-process call cap (`max_calls`); exceeding it raises instead of calling
 - responses are cached by request hash under data/interim/api_cache, so re-runs
   of the same request cost nothing
@@ -43,8 +44,11 @@ def api_key() -> str:
 
 
 class NimClient:
-    def __init__(self, max_calls: int, timeout: float = 300.0, retries_on_busy: int = 0, busy_wait: float = 30.0):
-        """retries_on_busy: extra attempts after HTTP 503 (shared free workers full); each counts as a call."""
+    def __init__(self, max_calls: int, timeout: float = 300.0, retries_on_busy: int = 0, busy_wait: float = 30.0,
+                 base_url: str = BASE_URL):
+        """retries_on_busy: extra attempts after HTTP 503 (shared free workers full); each counts as a call.
+        base_url: another OpenAI-compatible server, e.g. vLLM/NIM on DGX Spark."""
+        self.base_url = base_url.rstrip("/")
         self.max_calls = max_calls
         self.calls = 0
         self.timeout = timeout
@@ -54,7 +58,7 @@ class NimClient:
 
     def _request(self, method: str, path: str, body: dict | None = None) -> dict:
         data = None if body is None else json.dumps(body).encode("utf-8")
-        req = urllib.request.Request(f"{BASE_URL}{path}", data=data, method=method, headers={
+        req = urllib.request.Request(f"{self.base_url}{path}", data=data, method=method, headers={
             "Authorization": f"Bearer {self._key}",
             "Accept": "application/json",
             **({"Content-Type": "application/json"} if data else {}),

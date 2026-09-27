@@ -23,6 +23,6 @@ NVIDIA Agentic AI Hackathon(Creative Use-case 트랙) 출품작.
 1. ~~1차 확인 체크리스트~~ 완료 (HANDOFF 7.3).
 2. ~~라벨 파서~~ 완료: `aihub/` 패키지, `python scripts/build_interim.py`.
 3. ~~평가 세트, 합성 사고 건~~ 완료: `scripts/build_eval_fault.py`, `scripts/build_synth_cases.py` (HANDOFF 7.3).
-4. 입력→사정서 초안까지 가장 단순한 end-to-end 파이프라인을 먼저 돌린다. 정확도는 그 다음. (평가 영상·사진은 `data/interim/media/`에 추출 완료)
+4. ~~end-to-end 파이프라인~~ 골격 완료: `docs/ARCHITECTURE.md`, `agent/`, `eval/run_eval.py`. 오프라인 `oracle` 백엔드로 150건 동작 확인. 다음은 결제 후 `nim` 백엔드 실측(소표본부터, 호출 전 비용 추정을 사용자에게 알리고 승인받을 것).
 
 재생성 순서: `download_aihub.py --stage 1 meta 2 3` → `build_interim.py` → `build_eval_fault.py` → `build_synth_cases.py` → `extract_media.py` → `audit_eval_sets.py`.
