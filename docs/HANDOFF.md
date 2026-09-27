@@ -97,7 +97,7 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 | 역할 | 후보 모델 | 무료 API | 한국어 | 메모 |
 |---|---|---|---|---|
 | 영상·사진 이해 | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` | O (+다운로드) | **X (English only)** | 영상 mp4 최대 2분, 1080p는 1FPS/128프레임까지, 256K 컨텍스트, JSON 출력·도구 호출·추론 on/off(`enable_thinking`). 호스팅 API도 `video_url`에 base64 인라인(mp4/mov/webm). DGX Spark(GB10, 128GB 통합메모리) 지원: `--gpu-memory-utilization 0.70 --max-model-len 32768` 권장. vLLM은 기본 ~32프레임이므로 `--media-io-kwargs '{"video":{"fps":2,"num_frames":256}}'` 지정 |
-| 영상 물리 추론(보조) | `nvidia/cosmos3-nano-reasoner` | O | 명시 없음 | 텍스트+영상/이미지, 영상 4fps 권장. 신호·진행방향 판정 교차검증 후보 |
+| 영상 물리 추론(보조) | ~~`nvidia/cosmos3-nano-reasoner`~~ → `nvidia/cosmos-reason2-8b` | 웹은 O, **실제 API 목록엔 cosmos3 없음** | 명시 없음 | 5.2 참고. API로 부를 수 있는 것은 cosmos-reason2-8b |
 | 계획·과실 추론·사정서 작성 | `nvidia/nemotron-3-ultra-550b-a55b` | O | **O** | 1M 컨텍스트, 도구 호출. 한국어 공식 지원은 Nemotron 3 계열 중 Ultra뿐 |
 | (대안) 경량 에이전트 | `nemotron-3-super-120b-a12b`, `nemotron-3.5-lightning-30b-a3b` | O | X | 영어·유럽어·일본어(·중국어)만 |
 | 인정기준 RAG 임베딩 | `nvidia/nemotron-3-embed-1b` | O | O | 다국어·교차언어 검색 |
@@ -108,6 +108,33 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 
 - 블루프린트: **Video Search and Summarization(VSS) Agent**, RAG Blueprint(NeMo Retriever + Nemotron), NVIDIA Deep Researcher(AI-Q), **NemoClaw for OpenClaw**(4절의 OpenShell 샌드박스 시연 근거).
 - 스킬: `vss-summarize-video`, `vss-ask-video`, `nemo-retriever`, `nemo-retriever-mcp`, `rag-eval`, `nemoclaw-user-guide`, `nemotron-policy-generator`, `data-designer` 등. 라이브러리 필터에 NeMo Agent Toolkit(2), NemoClaw(1), 신뢰할 수 있는 AI(1).
+### 5.2 카탈로그 엑셀 기반 활용 검토 (2026-09-27)
+사용자가 만든 카탈로그 `docs/reference/build_nvidia_catalog.xlsx`(시트: 개요, Models 97, Skills 382, Blueprints 33, GPU·실행환경, **API 모델 ID 82**, 카테고리 통계). "API 모델 ID" 시트는 `integrate.api.nvidia.com/v1/models` 실제 조회 결과라 웹 배지보다 신뢰도가 높다. 개요 시트에 따르면 **예선 점수표에 "Skill API 활용" 항목**이 있다.
+
+웹 배지와 실제 API 목록 차이:
+- `cosmos3-nano-reasoner`, `cosmos3-nano`: 웹은 무료 엔드포인트, **API 목록에 없음** → `nvidia/cosmos-reason2-8b` 사용.
+- `nemotron-parse-2.0`, `nemotron-parse`, `llama-nemotron-embed-vl-1b-v2`: 웹은 다운로드만, **API로 호출 가능**.
+- 가드레일 `llama-3.1-nemoguard-8b-content-safety`, `llama-3.1-nemoguard-8b-topic-control`, `llama-3.1-nemotron-safety-guard-8b-v3`: API 호출 가능(웹 슬러그는 `3_1`, API ID는 `3.1`).
+- 리랭커는 API 목록에 없다. `nemotron-ocr-v2`도 없다.
+
+워크플로(4절) 단계별 활용 후보:
+
+| 단계 | 모델(API ID) | 스킬 / 블루프린트 | 비고 |
+|---|---|---|---|
+| A. 영상 분석 | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(주), `nvidia/cosmos-reason2-8b`(교차검증) | `vss-ask-video`, `vss-summarize-video`, `vss-generate-video-report`(VSS 배포 필요), `tao-run-deft-cr-its-mining`(교통 카메라 영상에 Cosmos Reason을 쓰는 NVIDIA 사례) | Omni 영어 전용 → 프롬프트·JSON 출력 영어 |
+| A. 과실 추론·플래너·사정서 | `nvidia/nemotron-3-ultra-550b-a55b`(한국어) / 서브에이전트 `nemotron-3.5-lightning-30b-a3b` | — | 한국어 출력은 Ultra만 |
+| A. 인정기준 RAG | `nvidia/nemotron-3-embed-1b`(한국어) | `nemo-retriever`(로컬 LanceDB), `nemo-retriever-mcp`, `rag-blueprint`, `rag-eval`(검색 정확도), `nemotron-retrieval-recipes` | 리랭커 API 없음 → 임베딩 top-k로 시작 |
+| B. 파손 사진 | Omni(이미지), `meta/llama-3.2-90b-vision-instruct` | — | |
+| B. 견적서 | (AI Hub는 JSON) 스캔 데모 시 `nvidia/nemotron-parse-2.0` | — | |
+| C. 이상 징후 | Omni/cosmos-reason2(영상-사진 모순), **`nvidia/ai-synthetic-video-detector`(AI 생성 영상 탐지)** | — | 조작·생성 블랙박스 영상 탐지를 SIU 신호로 추가 가능 |
+| 보안·개인정보 | `nvidia/nemotron-3.5-content-safety`, `llama-3.1-nemoguard-8b-topic-control` | **`nemotron-policy-generator`**(번호판·얼굴·연락처 차단 맞춤 정책 생성), `nemoclaw-user-guide` + NemoClaw/OpenShell(네트워크 정책으로 영상 외부 전송 차단) | 9절 데모 4번 |
+| 관측·프로파일링 | — | **NeMo Relay** 스킬(`nemo-relay-install`, `-instrument-calls`, `-plugin-observability`) | 도구·LLM 호출 감싸기, 이벤트·가드레일 미들웨어. 카탈로그에 NeMo Agent Toolkit·Evaluator·Guardrails 이름의 스킬은 없음 → 당일 가용성 확인 |
+| 데이터 | — | `data-designer` | 없는 "당사자 진술"을 합성(영상과 일치/불일치) → 4절 "진술 대조" 단계 재료 |
+| 스킬 거버넌스 | — | `skill-card-generator`, `nvidia-skill-finder` | 우리 도구를 SKILL.md 스킬로 만들고 스킬 카드 작성 → "Skill API 활용"·Skill Spector 스토리 |
+| 실행 환경 | — | Brev(L40S 31종 등), DGX Spark 플레이북 | 평가 배치는 Brev L40S 가능 |
+
+쓰지 않을 것: TAO 학습·DOCA·Jetson·Omniverse·BioNeMo·음성 계열 스킬 대부분, 이미지 생성 모델.
+
 - **설계 영향**: 영상 모델(Omni)은 영어 전용이므로 영상 분석 프롬프트와 출력(JSON)은 영어로 하고, 한국어가 필요한 단계(견적 항목 해석, 인정기준 검색, 사정서 작성)는 Ultra + 한국어 임베딩이 맡는다. Omni의 한국어 이해 품질은 11절 리스크대로 샘플로 먼저 검증.
 
 ## 6. 데이터
