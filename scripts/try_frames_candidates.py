@@ -2,15 +2,16 @@
 
 For each of the three first-trial videos, send 8 evenly spaced frames
 (640px, chronological) to Nemotron 3 Nano Omni together with the 84 in-scope
-car-to-car accident type codes (Korean descriptions from the dataset manual)
-and ask for the top-3 codes. Each video is asked twice: reasoning on and off.
+car-to-car accident type codes and ask for the top-3 codes. The candidate
+table is English (data/reference/accident_codes_en.csv) by default, or the
+Korean manual text with `ko`. Each video is asked twice: reasoning on and off.
 
 Guards: at most MAX_CALLS chat calls (default 6, retries after HTTP 503
 included), and stop once cumulative tokens exceed 60,000. Successful
 responses are cached, so a re-run only calls for the ones that failed.
 
 Usage:
-    python scripts/try_frames_candidates.py [max_calls]
+    python scripts/try_frames_candidates.py [max_calls] [en|ko]
 """
 
 from __future__ import annotations
@@ -31,8 +32,9 @@ VIDEOS = ["bb_1_100727_vehicle_21_024", "bb_1_161120_vehicle_255_34198", "bb_1_1
 PLACES = ("직선도로", "사거리교차로(신호등있음)", "T자형교차로")
 OMNI = "nvidia/nemotron-3-nano-omni-30b-a3b-reasoning"
 MAX_CALLS = int(sys.argv[1]) if len(sys.argv) > 1 else 6
+LANG = sys.argv[2] if len(sys.argv) > 2 else "en"   # candidate table: en (data/reference) or ko (manual)
 TOKEN_BUDGET = 60_000
-OUT = ROOT / "data" / "interim" / "trials" / "second_trial.json"
+OUT = ROOT / "data" / "interim" / "trials" / f"second_trial_{LANG}.json"
 
 
 def load_codes() -> list[dict]:
@@ -42,7 +44,12 @@ def load_codes() -> list[dict]:
 
 def candidate_block(codes: list[dict]) -> str:
     lines = ["code | place | situation | vehicle A | vehicle B"]
-    lines += [f"{c['code']} | {c['place_key']} | {c['place_feature']} | {c['a_progress']} | {c['b_progress']}" for c in codes]
+    if LANG == "en":
+        en = {r["code"]: r for r in csv.DictReader((ROOT / "data/reference/accident_codes_en.csv").open(encoding="utf-8"))}
+        lines += [f"{c['code']} | {en[c['code']]['place']} | {en[c['code']]['situation']} | "
+                  f"{en[c['code']]['vehicle_a']} | {en[c['code']]['vehicle_b']}" for c in codes]
+    else:
+        lines += [f"{c['code']} | {c['place_key']} | {c['place_feature']} | {c['a_progress']} | {c['b_progress']}" for c in codes]
     return "\n".join(lines)
 
 
@@ -51,7 +58,7 @@ def prompt(codes: list[dict], times: list[float]) -> str:
 The camera is mounted in the ego vehicle. Traffic in South Korea drives on the right.
 A collision between the ego vehicle and one other vehicle happens in the clip.
 
-In the candidate table below (Korean text), the ego vehicle is always "vehicle B" and the other vehicle is "vehicle A".
+In the candidate table below, the ego vehicle is always "vehicle B" and the other vehicle is "vehicle A".
 Choose the accident type codes that best match what happens. Consider the road layout, traffic signals,
 the direction each vehicle travels (straight, left turn, right turn, lane change, stopped...) and where they collide.
 
