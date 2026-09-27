@@ -43,10 +43,13 @@ def api_key() -> str:
 
 
 class NimClient:
-    def __init__(self, max_calls: int, timeout: float = 300.0):
+    def __init__(self, max_calls: int, timeout: float = 300.0, retries_on_busy: int = 0, busy_wait: float = 30.0):
+        """retries_on_busy: extra attempts after HTTP 503 (shared free workers full); each counts as a call."""
         self.max_calls = max_calls
         self.calls = 0
         self.timeout = timeout
+        self.retries_on_busy = retries_on_busy
+        self.busy_wait = busy_wait
         self._key = api_key()
 
     def _request(self, method: str, path: str, body: dict | None = None) -> dict:
@@ -73,6 +76,16 @@ class NimClient:
         cache = CACHE_DIR / f"{digest}.json"
         if cache.exists():
             return json.loads(cache.read_text(encoding="utf-8"))
+        for attempt in range(self.retries_on_busy + 1):
+            try:
+                return self._call(payload, tag, digest, cache)
+            except RuntimeError as e:
+                if "HTTP 503" not in str(e) or attempt == self.retries_on_busy:
+                    raise
+                time.sleep(self.busy_wait * (attempt + 1))
+        raise AssertionError("unreachable")
+
+    def _call(self, payload: dict, tag: str, digest: str, cache: Path) -> dict:
         if self.calls >= self.max_calls:
             raise CallCapExceeded(f"call cap {self.max_calls} reached; not calling {payload.get('model')}")
         self.calls += 1
