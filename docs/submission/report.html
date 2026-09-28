@@ -1,0 +1,335 @@
+<!DOCTYPE html>
+<html lang="ko">
+<head>
+<meta charset="utf-8">
+<title>협의 근거 에이전트 — 프로젝트 소개</title>
+<link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans+KR:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500&display=block">
+<style>
+  @page { size: A4; margin: 0; }
+  :root {
+    --ink: #0f1419; --body: #2b333b; --sub: #5f6b76; --faint: #8a95a0;
+    --line: #e2e6ea; --soft: #f4f6f8; --soft2: #eef1f4;
+    --nv: #76b900; --nv-d: #3f6b00; --nv-t: #eff7e1; --nv-l: #cfe7a6;
+    --dark: #0d1117; --warn: #b54708; --warn-t: #fff4e5;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  html { -webkit-print-color-adjust: exact; print-color-adjust: exact; }
+  body { font-family: "IBM Plex Sans KR", "Malgun Gothic", sans-serif; color: var(--body); font-size: 8.6pt; line-height: 1.55;
+         letter-spacing: -0.01em; background: #fff; word-break: keep-all; }
+  .page { width: 210mm; height: 297mm; position: relative; overflow: hidden; page-break-after: always; }
+  .page:last-child { page-break-after: auto; }
+  .wrap { padding: 0 14mm; }
+
+  /* header */
+  .hero { background: var(--dark); color: #fff; padding: 8.5mm 14mm 6mm; position: relative; }
+  .hero::after { content: ""; position: absolute; left: 0; right: 0; bottom: 0; height: 1.2mm; background: var(--nv); }
+  .topline { display: flex; justify-content: space-between; align-items: center; gap: 4mm; }
+  .domain { display: flex; gap: 1.6mm; }
+  .domain span { font-size: 8.4pt; font-weight: 700; color: #0d1a00; background: var(--nv); border-radius: 1.2mm; padding: 0.7mm 2.6mm; letter-spacing: -0.01em; }
+  .domain span + span { background: #2a3a12; color: #d9f0a8; }
+  .eyebrow { font-size: 7.4pt; font-weight: 600; letter-spacing: 0.08em; color: var(--nv); text-transform: uppercase; }
+  .hero h1 { font-size: 25pt; font-weight: 700; letter-spacing: -0.03em; line-height: 1.15; margin-top: 3mm; }
+  .hero h1 small { font-size: 12pt; font-weight: 500; color: #9aa4ae; letter-spacing: 0; margin-left: 2mm; }
+  .hero .lede { font-size: 10.2pt; color: #d5dbe1; margin-top: 2.5mm; max-width: 178mm; line-height: 1.5; }
+  .hero .meta { display: flex; justify-content: space-between; align-items: flex-end; margin-top: 4mm; gap: 6mm; }
+  .chips { display: flex; flex-wrap: wrap; gap: 1.5mm; }
+  .chip { font-size: 7pt; font-weight: 600; color: #cfe7a6; border: 0.3mm solid #3f6b00; background: #16210a; border-radius: 10mm; padding: 0.6mm 2.4mm; }
+  .gh { display: inline-flex; align-items: center; gap: 2mm; margin-top: 3.6mm; background: #ffffff; color: var(--dark); border-radius: 1.6mm; padding: 1.4mm 3mm 1.4mm 2.4mm; font-size: 9.4pt; font-weight: 600; white-space: nowrap; letter-spacing: 0; }
+  .gh svg { width: 4.4mm; height: 4.4mm; }
+  .hero .chips { margin-top: 3mm; }
+  .repo { font-size: 7.6pt; color: #9aa4ae; text-align: right; line-height: 1.4; }
+  .repo b { color: #fff; font-weight: 600; }
+
+  /* sections */
+  .sec { margin-top: 4.4mm; }
+  .page:last-child .sec { margin-top: 8.5mm; }
+  .sec-h { display: flex; align-items: baseline; gap: 2.5mm; margin-bottom: 2.6mm; }
+  .sec-h .n { font-size: 8pt; font-weight: 700; color: var(--nv-d); letter-spacing: 0.04em; }
+  .sec-h h2 { font-size: 12.5pt; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; }
+  .sec-h .rule { flex: 1; height: 0.25mm; background: var(--line); align-self: center; }
+  .cols { display: grid; gap: 6mm; }
+  p + p { margin-top: 1.6mm; }
+  b, strong { color: var(--ink); font-weight: 700; }
+  .caption { font-size: 7.2pt; color: var(--faint); margin-top: 1.8mm; line-height: 1.45; }
+  .caption b { color: var(--sub); font-weight: 700; }
+
+  /* problem */
+  .thesis { font-size: 11.4pt; font-weight: 700; color: var(--ink); line-height: 1.45; letter-spacing: -0.02em;
+            border-left: 1.1mm solid var(--nv); padding-left: 3.5mm; margin-bottom: 3mm; }
+  .kpis { display: grid; grid-template-rows: repeat(3, 1fr); gap: 2mm; }
+  .kpi { background: var(--soft); border-radius: 2mm; padding: 1.8mm 3.5mm; display: grid; grid-template-columns: 27mm 1fr; align-items: center; }
+  .kpi .v { font-size: 19pt; font-weight: 700; color: var(--ink); letter-spacing: -0.03em; line-height: 1; }
+  .kpi .v small { font-size: 9pt; font-weight: 700; margin-left: 0.5mm; }
+  .kpi .l { font-size: 7.6pt; color: var(--sub); line-height: 1.35; }
+  .kpi .l b { color: var(--body); }
+  .insight { margin-top: 3mm; background: var(--nv-t); border-radius: 2mm; padding: 2.6mm 3.5mm; font-size: 8.4pt; color: var(--nv-d); }
+  .insight b { color: var(--nv-d); }
+
+  /* before / after */
+  .lane { display: grid; grid-template-columns: 17mm 1fr; align-items: center; gap: 3mm; }
+  .lane + .lane { margin-top: 2.4mm; }
+  .lane .tag { font-size: 7.4pt; font-weight: 700; text-align: center; border-radius: 1.5mm; padding: 1.8mm 0; }
+  .lane.now .tag { background: var(--soft2); color: var(--sub); }
+  .lane.new .tag { background: var(--nv); color: #0d1a00; }
+  .flow { display: flex; align-items: stretch; gap: 0; }
+  .step { flex: 1; font-size: 7.6pt; line-height: 1.35; padding: 1.8mm 2.2mm; border-radius: 1.5mm; position: relative; }
+  .step b { display: block; font-size: 8pt; }
+  .step span { color: var(--faint); font-size: 6.9pt; }
+  .now .step { background: var(--soft); color: var(--sub); }
+  .new .step { background: var(--nv-t); color: var(--nv-d); }
+  .new .step b { color: var(--nv-d); }
+  .arrow { width: 5mm; display: flex; align-items: center; justify-content: center; color: var(--faint); font-size: 9pt; flex: none; }
+  .now .step.end { background: var(--warn-t); color: var(--warn); }
+  .now .step.end b { color: var(--warn); }
+  .new .step.end { background: var(--nv); color: #0d1a00; }
+  .new .step.end b { color: #0d1a00; }
+  .new .step.end span { color: #2c4a00; }
+
+  /* run timeline */
+  .run { display: grid; grid-template-columns: 1.08fr 1fr; gap: 6mm; }
+  .goal { background: var(--dark); color: #e8ecef; border-radius: 2mm; padding: 2.4mm 3.2mm; font-size: 8pt; line-height: 1.45; }
+  .goal .who { font-size: 6.8pt; color: var(--nv); font-weight: 700; letter-spacing: 0.04em; display: block; margin-bottom: 0.6mm; }
+  .tl { list-style: none; margin-top: 2.6mm; position: relative; }
+  .tl::before { content: ""; position: absolute; left: 11.2mm; top: 1.5mm; bottom: 1.5mm; width: 0.3mm; background: var(--line); }
+  .tl li { display: grid; grid-template-columns: 9.5mm 3.4mm 1fr; column-gap: 1.6mm; align-items: start; padding: 0.35mm 0; }
+  .tl .t { font-size: 7pt; color: var(--faint); font-variant-numeric: tabular-nums; text-align: right; padding-top: 0.2mm; }
+  .tl .d { width: 2.4mm; height: 2.4mm; border-radius: 50%; background: #fff; border: 0.5mm solid var(--faint); margin-top: 0.9mm; position: relative; z-index: 1; }
+  .tl .x { font-size: 7.5pt; line-height: 1.4; color: var(--body); }
+  .tl .x code { font-family: "IBM Plex Mono", "IBM Plex Sans KR", monospace; font-size: 6.9pt; color: var(--sub); background: var(--soft); border-radius: 0.8mm; padding: 0 1mm; }
+  .tl li.v .d { border-color: var(--nv); background: var(--nv); }
+  .tl li.k .d { border-color: var(--nv-d); background: #fff; }
+  .tl li.r .d { border-color: var(--warn); }
+  .tl .x em { font-style: normal; color: var(--nv-d); font-weight: 700; }
+  .legend { display: flex; gap: 3mm; font-size: 6.8pt; color: var(--faint); margin-top: 1.4mm; }
+  .legend i { display: inline-block; width: 2mm; height: 2mm; border-radius: 50%; margin-right: 1mm; vertical-align: -0.2mm; }
+  .stats { display: grid; grid-template-columns: repeat(4, 1fr); gap: 1.6mm; margin-top: 2.6mm; }
+  .stat { border: 0.25mm solid var(--line); border-radius: 1.6mm; padding: 1.6mm 2mm; }
+  .stat .v { font-size: 12.5pt; font-weight: 700; color: var(--ink); letter-spacing: -0.02em; line-height: 1.1; }
+  .stat .l { font-size: 6.8pt; color: var(--sub); }
+
+  /* letter excerpt */
+  .doc { border: 0.25mm solid #d5dbe1; border-radius: 2mm; background: #fff; box-shadow: 0 0.6mm 2.4mm rgba(15,20,25,0.08); overflow: hidden; }
+  .doc-top { background: var(--soft); border-bottom: 0.25mm solid var(--line); padding: 2mm 3.2mm; display: flex; justify-content: space-between; align-items: center; }
+  .doc-top .ttl { font-size: 8.8pt; font-weight: 700; color: var(--ink); }
+  .pill { font-size: 6.6pt; font-weight: 700; color: var(--warn); background: var(--warn-t); border-radius: 5mm; padding: 0.4mm 2mm; white-space: nowrap; }
+  .doc-body { padding: 2.6mm 3.2mm 3mm; font-size: 7.6pt; line-height: 1.5; }
+  .doc-body h4 { font-size: 7.4pt; font-weight: 700; color: var(--sub); margin: 2.2mm 0 0.8mm; }
+  .doc-body h4:first-child { margin-top: 0; }
+  .cite { background: var(--nv-t); border-radius: 1.4mm; padding: 1.8mm 2.4mm; color: var(--nv-d); }
+  .cite b { color: var(--nv-d); }
+  .mini { width: 100%; border-collapse: collapse; font-size: 6.9pt; }
+  .mini th { text-align: left; font-weight: 700; color: var(--sub); border-bottom: 0.25mm solid var(--line); padding: 0.8mm 1mm; }
+  .mini td { border-bottom: 0.25mm solid var(--soft2); padding: 0.9mm 1mm; vertical-align: top; }
+  .ok { color: var(--nv-d); font-weight: 700; }
+  .no { color: var(--faint); }
+  .doc-foot { display: flex; justify-content: space-between; margin-top: 2mm; font-size: 7.2pt; }
+  .fade { color: var(--faint); font-size: 6.8pt; margin-top: 1.4mm; }
+
+  /* page 2 */
+  .arch img { width: 100%; display: block; margin: 0 auto; border-radius: 2mm; }
+  table.tech { width: 100%; border-collapse: collapse; font-size: 7.7pt; }
+  .tech th { text-align: left; font-size: 7pt; font-weight: 700; color: var(--sub); padding: 1.3mm 2mm; border-bottom: 0.4mm solid var(--ink); }
+  .tech td { padding: 1mm 2mm; border-bottom: 0.25mm solid var(--line); vertical-align: top; line-height: 1.42; }
+  .tech td:first-child { font-weight: 700; color: var(--ink); white-space: nowrap; }
+  .tech td:last-child { font-family: "IBM Plex Mono", "IBM Plex Sans KR", monospace; font-size: 6.6pt; color: var(--sub); }
+  .tech .grp td { background: var(--soft); font-family: inherit; font-size: 6.8pt; font-weight: 700; color: var(--nv-d); letter-spacing: 0.04em; padding: 0.9mm 2mm; }
+  .own { display: inline-block; font-size: 6.2pt; font-weight: 700; color: var(--nv-d); background: var(--nv-t); border-radius: 1mm; padding: 0 1.2mm; margin-left: 1mm; vertical-align: 0.3mm; }
+
+  .funnel .row { display: grid; grid-template-columns: 24mm 1fr; gap: 2.4mm; align-items: center; }
+  .funnel .row + .row { margin-top: 3mm; }
+  .funnel .k { font-size: 7.4pt; font-weight: 700; color: var(--ink); line-height: 1.3; }
+  .funnel .k span { display: block; font-weight: 400; color: var(--faint); font-size: 6.6pt; }
+  .bar { height: 5.6mm; background: var(--soft2); border-radius: 1.2mm; position: relative; overflow: hidden; }
+  .bar i { position: absolute; left: 0; top: 0; bottom: 0; background: var(--nv); border-radius: 1.2mm; }
+  .bar em { position: absolute; left: 2mm; top: 50%; transform: translateY(-50%); font-style: normal; font-size: 7pt; font-weight: 700; color: #0d1a00; white-space: nowrap; }
+  .bar em.out { color: var(--sub); }
+  .seg { display: flex; height: 5.6mm; border-radius: 1.2mm; overflow: hidden; font-size: 6.8pt; font-weight: 700; }
+  .seg div { display: flex; align-items: center; justify-content: center; }
+
+  .notes { list-style: none; }
+  .notes li { position: relative; padding-left: 4mm; font-size: 8pt; line-height: 1.5; }
+  .notes li + li { margin-top: 1.6mm; }
+  .notes li::before { content: ""; position: absolute; left: 0.6mm; top: 1.9mm; width: 1.6mm; height: 1.6mm; border-radius: 0.4mm; background: var(--nv); }
+  .notes.lim li::before { background: var(--warn); border-radius: 50%; }
+  .sub-h { font-size: 8pt; font-weight: 700; color: var(--ink); margin-bottom: 1.4mm; }
+  pre { font-family: "IBM Plex Mono", "IBM Plex Sans KR", monospace; font-size: 6.9pt; line-height: 1.55; background: var(--dark); color: #d5dbe1; border-radius: 2mm; padding: 2.4mm 3.2mm; white-space: pre-wrap; }
+  pre .c { color: #7d8792; }
+  pre .g { color: var(--nv); }
+
+  .foot { position: absolute; left: 14mm; right: 14mm; bottom: 7mm; display: flex; justify-content: space-between; font-size: 6.6pt; color: var(--faint);
+          border-top: 0.25mm solid var(--line); padding-top: 1.8mm; line-height: 1.4; }
+</style>
+</head>
+<body>
+
+<!-- ============ PAGE 1 ============ -->
+<section class="page">
+  <header class="hero">
+    <div class="topline">
+      <div class="domain"><span>자동차보험</span><span>교통사고 보상 처리</span><span>과실비율 · 수리비 합의</span></div>
+      <div class="eyebrow">NVIDIA Agentic AI Hackathon · 팀 종지</div>
+    </div>
+    <h1>협의 근거 에이전트<small>Claim Evidence Agent</small></h1>
+    <p class="lede">교통사고가 나면 보험사 보상 담당자는 <b style="color:#fff">누가 몇 % 잘못했는지(과실비율)</b>와 <b style="color:#fff">차 수리비</b>를 상대 보험사·정비공장과 합의해야 합니다. 이 에이전트는 블랙박스 영상·과실비율 인정기준·진술·견적서를 조사해 합의에 쓸 <b style="color:#fff">근거 묶음 초안</b>을 만듭니다.</p>
+    <div class="gh"><svg viewBox="0 0 16 16" aria-hidden="true"><path fill="currentColor" d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg><span>https://github.com/googlershh/nvidia-car-claim-evidence-agent</span></div>
+    <div class="chips">
+        <span class="chip">NemoClaw</span><span class="chip">OpenShell</span><span class="chip">VSS Blueprint</span>
+        <span class="chip">Cosmos3 Nano Reasoner</span><span class="chip">Nemotron 3 Super</span><span class="chip">Agent Skills</span>
+    </div>
+  </header>
+
+  <div class="wrap">
+    <div class="sec">
+      <div class="sec-h"><span class="n">01</span><h2>문제</h2><span class="rule"></span></div>
+      <div class="cols" style="grid-template-columns: 1.25fr 1fr;">
+        <div>
+          <p class="thesis">교통사고 보상이 늦어지는 건 판단이 어려워서가 아니라 근거를 만드는 데 손이 많이 들어서입니다. 그 사이 합의가 틀어져 연 15.7만 건이 분쟁심의로 갑니다.</p>
+          <p>보상 담당자(대물 손해사정)는 사고마다 상대 보험사와 <b>과실비율</b>을, 정비공장과 <b>수리비</b>를 합의합니다. 근거를 위해 영상을 여러 번 돌려 보며 해당 기준 도표를 찾고, 방향지시등을 켰는지 같은 가감 사유가 몇 초에 보이는지 직접 정리합니다. 합의가 안 되면 협회 심의위원회(분쟁심의)로 넘어갑니다.</p>
+          <div class="insight"><b>통찰</b> — 심의 결정의 95%가 그대로 받아들여질 만큼 결론은 인정기준으로 예측됩니다. 근거만 빨리 갖추면 심의까지 가지 않아도 됩니다.</div>
+        </div>
+        <div class="kpis">
+          <div class="kpi"><div class="v">15.7<small>만 건</small></div><div class="l"><b>분쟁심의 청구</b><br>2024년 한 해</div></div>
+          <div class="kpi"><div class="v">61<small>일</small></div><div class="l"><b>소심의 평균 소요</b><br>대표자 회의 41일 · 재심의 113일</div></div>
+          <div class="kpi"><div class="v">95<small>%</small></div><div class="l"><b>심의 결정 수용률</b><br>결정이 그대로 받아들여진 비율(2018)</div></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">02</span><h2>해결 — 보상 담당자의 근거 정리를 에이전트가 대신합니다</h2><span class="rule"></span></div>
+      <div class="lane now">
+        <div class="tag">지금</div>
+        <div class="flow">
+          <div class="step"><b>영상 반복 시청</b><span>진행·충돌 시각 파악</span></div><div class="arrow">›</div>
+          <div class="step"><b>도표 찾기</b><span>인정기준 600쪽</span></div><div class="arrow">›</div>
+          <div class="step"><b>진술·주장 대조</b><span>피보험자·상대사</span></div><div class="arrow">›</div>
+          <div class="step"><b>견적 검토</b><span>사진과 항목 대조</span></div><div class="arrow">›</div>
+          <div class="step end"><b>합의 실패 시 심의</b><span>소심의 평균 61일</span></div>
+        </div>
+      </div>
+      <div class="lane new">
+        <div class="tag">에이전트</div>
+        <div class="flow">
+          <div class="step"><b>목표 한 줄</b><span>"이 건 협의 근거 만들어줘"</span></div><div class="arrow">›</div>
+          <div class="step" style="flex:2.2"><b>스스로 조사 계획·실행</b><span>VSS 영상 질의 → 도표 선택 → 진술 대조 → 수정요소 구간 재질문 → 견적·이상징후</span></div><div class="arrow">›</div>
+          <div class="step"><b>근거 묶음 초안</b><span>협의 문서·조정 요청·SIU 메모</span></div><div class="arrow">›</div>
+          <div class="step end"><b>담당자 승인</b><span>승인 후에만 발송</span></div>
+        </div>
+      </div>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">03</span><h2>실제 실행 — 사고 건 C006</h2><span class="rule"></span></div>
+      <div class="run">
+        <div>
+          <div class="goal"><span class="who">담당자 → 에이전트</span>"사건 C006: 이 건 상대 보험사와 정비공장에 보낼 협의 근거를 만들어줘. claim-evidence 스킬 절차를 따르고, 영상은 VSS로 확인해줘."</div>
+          <ol class="tl">
+            <li class="k"><span class="t">0:02</span><span class="d"></span><span class="x">스킬 절차 읽기 <code>claim-evidence/SKILL.md</code></span></li>
+            <li class="k"><span class="t">0:04</span><span class="d"></span><span class="x">사고 건 자료 조회 <code>cli case C006</code></span></li>
+            <li class="v"><span class="t">0:20</span><span class="d"></span><span class="x">VSS에 영상 전체 설명 요청 <code>vss vlm run</code></span></li>
+            <li class="k"><span class="t">0:29</span><span class="d"></span><span class="x">직선도로 사고유형 후보 비교 <code>cli candidates</code></span></li>
+            <li class="k"><span class="t">0:32</span><span class="d"></span><span class="x">인정기준 도표 선택 → <em>차43-2</em> 후행 직진 대 선행 진로변경</span></li>
+            <li class="k"><span class="t">0:44</span><span class="d"></span><span class="x">견적 검증 <code>cli estimate</code></span></li>
+            <li class="v"><span class="t">2:54</span><span class="d"></span><span class="x"><em>수정요소 재조사</em>: "0~3초에 앞차가 방향지시등을 켰나?" 구간 질문 4회</span></li>
+            <li class="k"><span class="t">3:24</span><span class="d"></span><span class="x">이상징후 점검 → 충돌 부위와 사진 불일치 표시 <code>cli anomaly</code></span></li>
+            <li class="r"><span class="t">7:45</span><span class="d"></span><span class="x">협의 문서 작성 <code>cli letter</code> 인자 오류 2회 → 스키마를 읽고 스스로 수정</span></li>
+            <li class="k"><span class="t">8:26</span><span class="d"></span><span class="x">협의 문서·사정서 생성, 내용 확인 후 담당자에게 보고</span></li>
+          </ol>
+          <div class="legend"><span><i style="background:var(--nv)"></i>VSS 영상 질의</span><span><i style="border:0.5mm solid var(--nv-d)"></i>우리 도구</span><span><i style="border:0.5mm solid var(--warn)"></i>오류 복구</span></div>
+          <div class="stats">
+            <div class="stat"><div class="v">8분 29초</div><div class="l">목표 → 문서</div></div>
+            <div class="stat"><div class="v">26회</div><div class="l">도구 호출</div></div>
+            <div class="stat"><div class="v">6회</div><div class="l">VSS 영상 질문</div></div>
+            <div class="stat"><div class="v">0회</div><div class="l">중간 사람 개입</div></div>
+          </div>
+        </div>
+        <div>
+          <div class="doc">
+            <div class="doc-top"><span class="ttl">과실 협의 근거 — C006</span><span class="pill">담당자 승인 전 초안</span></div>
+            <div class="doc-body">
+              <h4>당사 판단</h4>
+              <div class="cite">자동차사고 과실비율 인정기준(제10차 개정) <b>차43-2</b><br>「후행 직진 대 선행 진로변경」 · 기본과실 당사:귀사 <b>70:30</b></div>
+              <h4>수정요소 검토 (영상 확인 대상)</h4>
+              <table class="mini">
+                <tr><th>수정요소</th><th>가감</th><th>상태</th><th>근거 시각</th></tr>
+                <tr><td>진로변경 신호불이행·지연</td><td>+10</td><td class="ok">영상에서 확인</td><td>0–5초 방향지시등 미점등</td></tr>
+                <tr><td>버스·다인승전용차로 위반</td><td>+10</td><td class="no">확인되지 않음</td><td>–</td></tr>
+                <tr><td>고속도로 추월차로로 변경</td><td>+10</td><td class="no">확인되지 않음</td><td>–</td></tr>
+              </table>
+              <h4>귀사 주장 검토</h4>
+              <div>귀사 주장 차43-2 · 70:30 → <span class="ok">영상 판단과 일치</span></div>
+              <div class="doc-foot"><span><b>분쟁심의 가능성</b> 낮음</span><span style="color:var(--faint)">내부용: 피보험자 진술 대조 별도</span></div>
+            </div>
+          </div>
+        </div>
+      </div>
+    </div>
+  </div>
+  <div class="foot"><span>협의 근거 에이전트 · 자동차보험 교통사고 보상 · 팀 종지</span><span>1 / 2</span></div>
+</section>
+
+<!-- ============ PAGE 2 ============ -->
+<section class="page">
+  <div class="wrap" style="padding-top: 8.5mm;">
+    <div class="sec" style="margin-top:0">
+      <div class="sec-h"><span class="n">04</span><h2>아키텍처</h2><span class="rule"></span></div>
+      <div class="arch"><img src="../assets/stack.svg" alt="스택 다이어그램"></div>
+      <p class="caption" style="text-align:center"><b>그림</b> — 에이전트·스킬·자료는 OpenShell 샌드박스 안에서 돌고, 영상은 같은 GPU의 VSS(Cosmos3)가 분석합니다.</p>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">05</span><h2>NVIDIA 기술을 어디에 썼나</h2><span class="rule"></span></div>
+      <table class="tech">
+        <tr><th style="width:36mm">구성요소</th><th>이 프로젝트에서 한 일</th><th style="width:52mm">근거</th></tr>
+        <tr class="grp"><td colspan="3">에이전트 실행과 보안</td></tr>
+        <tr><td>NemoClaw · OpenClaw</td><td>에이전트 하네스. 스킬을 읽고 도구 호출 순서를 스스로 정함</td><td>scripts/brev/02_connect_nemoclaw_vss.sh</td></tr>
+        <tr><td>OpenShell</td><td>샌드박스. 네트워크 기본 차단 후 VSS 등 필요한 목적지만 허용, API 키는 샌드박스 밖 제공자에 보관</td><td>scripts/brev/04_use_openrouter.sh</td></tr>
+        <tr class="grp"><td colspan="3">영상 이해</td></tr>
+        <tr><td>VSS Blueprint</td><td>영상 저장(VST)과 영상 질의응답 에이전트(NeMo Agent Toolkit 기반, Phoenix 추적). A6000 한 대에 배포</td><td>scripts/brev/01_deploy_vss.sh</td></tr>
+        <tr><td>Cosmos3 Nano Reasoner</td><td>블랙박스 영상 이해 모델(NIM), GPU에서 직접 서빙</td><td>scripts/brev/vss_ask_clip.sh</td></tr>
+        <tr class="grp"><td colspan="3">모델과 스킬</td></tr>
+        <tr><td>Nemotron 3 Super · 3.5</td><td>에이전트의 계획·도구 호출(3 Super), VSS 에이전트의 LLM(3.5 Lightning)</td><td>scripts/brev/04_use_openrouter.sh</td></tr>
+        <tr><td>vss-ask-video 스킬</td><td>NVIDIA 공식 스킬. 수정요소마다 영상 구간 질문</td><td>샌드박스 스킬 목록</td></tr>
+        <tr><td>claim-evidence 스킬<span class="own">직접 작성</span></td><td>도메인 절차와 도구 8종(사고 건 목록·조회, 후보, 도표, 진술 대조, 견적, 이상징후, 협의 문서)</td><td>skills/claim-evidence/SKILL.md<br>agent/cli.py</td></tr>
+      </table>
+    </div>
+
+    <div class="sec">
+      <div class="sec-h"><span class="n">06</span><h2>데이터와 검증</h2><span class="rule"></span></div>
+      <div class="cols" style="grid-template-columns: 1.15fr 1fr;">
+        <div class="funnel">
+          <div class="row"><div class="k">사고 영상<span>AI Hub 교통사고 영상</span></div>
+            <div class="bar"><i style="width:61.3%"></i><em>150건 전수 검수 → 92건 사용</em></div></div>
+          <div class="row"><div class="k">사고유형 → 도표<span>인정기준 제10차</span></div>
+            <div class="bar"><i style="width:94%"></i><em>84개 코드 → 도표 65개, 기본과실 79/84 재현</em></div></div>
+          <div class="row"><div class="k">수리비 정답<span>쏘카 손해사정 전·후</span></div>
+            <div class="bar"><i style="width:16.8%"></i><em class="out" style="left:18.5%">쏘카 견적 68,002건 중 실제 조정 11,425건</em></div></div>
+          <div class="row"><div class="k">합성 사고 건<span>영상+사진+견적+진술</span></div>
+            <div class="seg">
+              <div style="width:60.9%;background:var(--nv);color:#0d1a00">정상 56</div>
+              <div style="width:19.55%;background:var(--nv-l);color:var(--nv-d)">과잉 견적 18</div>
+              <div style="width:19.55%;background:#fbd9b4;color:var(--warn)">모순 18</div>
+            </div></div>
+          <p class="caption">검수에서 라벨 오류(앞차 후진을 추돌로 표기 등)와 역할반전을 찾아 뺐고, 10차 개정으로 기본과실이 바뀐 6건은 현행 기준으로 고쳤습니다.</p>
+        </div>
+        <div>
+          <div class="sub-h">확인된 것</div>
+          <ul class="notes">
+            <li>목표 한 줄에서 협의 문서까지 에이전트가 스스로 완주(C006)</li>
+            <li>영상 근거 시각이 수정요소 표에 들어감(0–5초 방향지시등 미점등)</li>
+            <li>AI Hub 코드를 인정기준 도표로 바꾸고 현행 기본과실을 인용</li>
+          </ul>
+          <div class="sub-h" style="margin-top:3mm">한계</div>
+          <ul class="notes lim">
+            <li>영상 모델의 사고유형·역할 판정 정확도는 소표본만 시험, 92건 측정 전(C006의 역할 판단도 검수 라벨과 달라 재확인 중)</li>
+            <li>수정요소 판단은 공개 정답이 없어 "영상 확인 필요" 분류까지만 평가</li>
+          </ul>
+        </div>
+      </div>
+    </div>
+
+  </div>
+  <div class="foot"><span>통계: 보험연구원 「자동차보험 민원·소송 현황과 제도개선 방향」(2026) 인용 보도, 과실비율분쟁심의위원회 · 인정기준: 손해보험협회 제10차 개정(2023)</span><span>2 / 2</span></div>
+</section>
+</body>
+</html>

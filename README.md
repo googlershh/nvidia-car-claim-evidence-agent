@@ -84,6 +84,6 @@ python eval/run_eval.py --backend oracle
 | [docs/DIRECTION.md](docs/DIRECTION.md) · [docs/SCOPE.md](docs/SCOPE.md) | 문제 정의, 범위, 남은 일 |
 | [docs/LABEL_REVIEW.md](docs/LABEL_REVIEW.md) | 평가 영상 150건 검수 |
 | [docs/ROI_EVIDENCE.md](docs/ROI_EVIDENCE.md) | 현업 조사와 통계 |
-| [docs/submission/](docs/submission/) | 제출용 한 페이지 소개서 |
+| [docs/submission/](docs/submission/) | 제출용 2쪽 소개서(`report.html` → PDF)와 양식 답변 |
 
 과실 판정은 "초안 + 근거 + 사람 승인"을 원칙으로 합니다. 이 에이전트는 과실을 결정하지 않습니다.
