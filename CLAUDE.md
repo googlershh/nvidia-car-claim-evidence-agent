@@ -28,6 +28,6 @@ NVIDIA Agentic AI Hackathon(Creative Use-case 트랙) 출품작.
 4. ~~end-to-end 파이프라인~~ 골격 완료: `docs/ARCHITECTURE.md`, `agent/`, `eval/run_eval.py`. 오프라인 `oracle` 백엔드로 검수 통과 92건 동작 확인(청구 차량 A/B 역할 반영).
 5. ~~평가 영상 150건 전수 검수~~ 완료: `docs/LABEL_REVIEW.md`. 이후 평가·합성 건은 검수 통과 92건만 쓴다.
 6. 방향 전환 검토 중: 대물 담당자의 협의 근거 에이전트(`docs/DIRECTION.md`, `docs/SCOPE.md`, 근거 `docs/ROI_EVIDENCE.md`). 다음은 **영상 판정 관문 15건**(DIRECTION 5절). 영상 모델 가용성은 HANDOFF 5.4, VSS 스킬은 5.2.1. 유료 호출은 비용 추정을 알리고 승인받을 것.
-7. Brev 인스턴스에 VSS + NemoClaw 배포·연결 완료(2026-09-28, `scripts/brev/README.md`, HANDOFF 7.3). 인스턴스는 정지 불가라 **작업이 끝나면 삭제**할 것(시간당 $0.68). 제출 자료는 `docs/submission/`, GitHub `googlershh/nvidia-car-claim-evidence-agent`(비공개).
+7. Brev 인스턴스에 VSS + NemoClaw 배포·연결 완료(2026-09-28, `scripts/brev/README.md`, HANDOFF 7.3). 인스턴스는 정지 불가라 **작업이 끝나면 삭제**할 것(시간당 $0.68). 제출 자료는 `docs/submission/`, GitHub `googlershh/nvidia-car-claim-evidence-agent`(공개, 2026-09-28 전환). 공개 저장소이므로 키·AI Hub 원본은 절대 커밋하지 않는다.
 
 재생성 순서: `download_aihub.py --stage 1 meta 2 3` → `build_interim.py` → `build_eval_fault.py` → `build_eval_reviewed.py`(검수 매니페스트 `data/manifests/label_review.csv` 적용, 92건) → `build_synth_cases.py` → `build_statements.py`(진술·상대 주장 합성) → `extract_media.py` → `audit_eval_sets.py`. 인정기준: `download_knia.py` → `build_chart_map.py`(코드 → 도표 매핑, `data/reference/code_to_chart.csv`).
