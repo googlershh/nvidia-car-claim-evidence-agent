@@ -1,0 +1,14 @@
+{
+  "name": "case-note-share-demo",
+  "private": true,
+  "version": "1.0.0",
+  "scripts": {
+    "build": "npm run build --prefix editor && python3 scripts/build.py",
+    "preview": "python3 scripts/serve.py --root dist --port 8767",
+    "test": "node scripts/browser-test.cjs",
+    "deploy": "wrangler deploy"
+  },
+  "devDependencies": {
+    "wrangler": "4.143.0"
+  }
+}
