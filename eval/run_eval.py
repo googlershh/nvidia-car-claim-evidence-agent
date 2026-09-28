@@ -30,8 +30,9 @@ def metrics(rows: list[dict]) -> dict:
     n = len(rows)
     top1 = sum(r["pred_code"] == r["true_code"] for r in rows)
     top3 = sum(r["true_code"] in r["pred_top3"] for r in rows)
-    fault_exact = sum(r["pred_fault_a"] == r["true_fault_a"] for r in rows)
-    fault_10 = sum(abs(r["pred_fault_a"] - r["true_fault_a"]) <= 10 for r in rows)
+    role_ok = sum(r["pred_claimant_role"] == r["true_claimant_role"] for r in rows)
+    fault_exact = sum(r["pred_claimant_fault"] == r["true_claimant_fault"] for r in rows)
+    fault_10 = sum(abs(r["pred_claimant_fault"] - r["true_claimant_fault"]) <= 10 for r in rows)
     route_ok = sum(r["pred_route"] == r["true_route"] for r in rows)
     siu_true = [r for r in rows if r["true_route"] == "siu"]
     siu_pred = [r for r in rows if r["pred_route"] == "siu"]
@@ -44,7 +45,8 @@ def metrics(rows: list[dict]) -> dict:
     return {
         "cases": n,
         "accident_type_top1": top1 / n, "accident_type_top3": top3 / n,
-        "fault_exact": fault_exact / n, "fault_within_10pt": fault_10 / n,
+        "claimant_role_accuracy": role_ok / n,
+        "claimant_fault_exact": fault_exact / n, "claimant_fault_within_10pt": fault_10 / n,
         "route_accuracy": route_ok / n,
         "siu_recall": siu_tp / len(siu_true) if siu_true else None,
         "siu_precision": siu_tp / len(siu_pred) if siu_pred else None,
@@ -89,7 +91,8 @@ def main() -> None:
             row = {
                 "case_id": bundle.case_id, "case_type": truth.case_type,
                 "true_code": truth.accident_type, "pred_code": res.fault.code, "pred_top3": res.video.top3,
-                "true_fault_a": truth.fault_a, "pred_fault_a": res.fault.fault_a,
+                "true_claimant_role": truth.claimant_role, "pred_claimant_role": res.fault.claimant_role,
+                "true_claimant_fault": truth.claimant_fault, "pred_claimant_fault": res.fault.claimant_fault,
                 "true_route": truth.expected_route, "pred_route": res.decision.route,
                 "injected": truth.injected, "flagged": [c.line.name for c in res.lines if c.flagged],
                 "true_approved": truth.approved_total, "pred_approved": res.decision.approved_total,

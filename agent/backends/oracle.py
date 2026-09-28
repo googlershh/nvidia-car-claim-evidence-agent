@@ -18,7 +18,8 @@ class _Video:
 
     def analyze(self, bundle: ClaimBundle) -> VideoFinding:
         t = self.truths[bundle.case_id]
-        return VideoFinding(top3=[t.accident_type], scene={"evidence": "(oracle) 데이터셋 라벨의 사고유형"}, source="oracle")
+        return VideoFinding(top3=[t.accident_type], scene={"evidence": "(oracle) 검수된 라벨의 사고유형"}, source="oracle",
+                            ego_role=t.claimant_role)
 
 
 class _Damage:

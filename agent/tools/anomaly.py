@@ -14,13 +14,15 @@ def _ko(dirs: set[str]) -> str:
 
 
 def check_consistency(fault: FaultAssessment, damage: DamageFinding) -> list[Anomaly]:
-    fit = fits([en_part_directions(p) for p in damage.parts], fault.impact_b)
+    impact = fault.claimant_impact
+    fit = fits([en_part_directions(p) for p in damage.parts], impact)
     if fit == "contradiction":
         severity = "siu" if fault.confidence in ("high", "medium") else "review"
         return [Anomaly("impact_mismatch", severity,
-                        f"사고유형 {fault.code}({fault.situation})에서 청구 차량(B)의 충돌 가능 부위는 {_ko(fault.impact_b)}인데, "
-                        f"사진의 손상은 {_ko(damage.directions)}에만 있음 (사고유형-부위 대응 신뢰도 {fault.confidence})")]
+                        f"사고유형 {fault.code}({fault.situation})에서 청구 차량({fault.claimant_role})의 충돌 가능 부위는 "
+                        f"{_ko(impact)}인데, 사진의 손상은 {_ko(damage.directions)}에만 있음 "
+                        f"(사고유형-부위 대응 신뢰도 {fault.confidence})")]
     if fit == "partial":
         return [Anomaly("impact_partial", "info",
-                        f"사진 손상 일부({_ko(damage.directions - fault.impact_b)})가 사고유형의 충돌 가능 부위 밖에 있음")]
+                        f"사진 손상 일부({_ko(damage.directions - impact)})가 사고유형의 충돌 가능 부위 밖에 있음")]
     return []

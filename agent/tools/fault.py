@@ -66,4 +66,5 @@ def search_fault_table(finding: VideoFinding) -> FaultAssessment:
         b_progress=r["b_progress"], fault_a=int(r["fault_a"]), fault_b=int(r["fault_b"]),
         alternatives=[c for c in finding.top3 if c != code],
         impact_a=set(area["a"]), impact_b=set(area["b"]), confidence=area["confidence"],
+        claimant_role=finding.ego_role if finding.ego_role in ("A", "B") else "B",
     )

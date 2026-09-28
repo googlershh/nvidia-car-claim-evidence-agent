@@ -39,6 +39,7 @@ class VideoFinding:
     top3: list[int]                  # accident type codes, best first
     scene: dict = field(default_factory=dict)   # ego/other movement, road type, evidence ...
     source: str = ""                 # backend name
+    ego_role: str = "B"              # which table vehicle (A/B) the filming car is in the chosen code
 
 
 @dataclass
@@ -48,12 +49,36 @@ class FaultAssessment:
     situation: str
     a_progress: str
     b_progress: str
-    fault_a: int                     # other party (our insured)
-    fault_b: int                     # claimant
+    fault_a: int                     # table vehicle A
+    fault_b: int                     # table vehicle B
     alternatives: list[int]
     impact_a: set[str]
     impact_b: set[str]
     confidence: str                  # collision-area confidence: high | medium | low
+    # The claimant is the filming car. The dataset manual says it is vehicle B, but the
+    # label review found 19 of 92 usable clips where it is vehicle A (docs/LABEL_REVIEW.md).
+    claimant_role: str = "B"
+
+    @property
+    def claimant_fault(self) -> int:
+        return self.fault_b if self.claimant_role == "B" else self.fault_a
+
+    @property
+    def other_fault(self) -> int:
+        """Fault share of the other party (our insured): the payout ratio."""
+        return self.fault_a if self.claimant_role == "B" else self.fault_b
+
+    @property
+    def claimant_progress(self) -> str:
+        return self.b_progress if self.claimant_role == "B" else self.a_progress
+
+    @property
+    def other_progress(self) -> str:
+        return self.a_progress if self.claimant_role == "B" else self.b_progress
+
+    @property
+    def claimant_impact(self) -> set[str]:
+        return self.impact_b if self.claimant_role == "B" else self.impact_a
 
 
 @dataclass

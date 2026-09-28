@@ -62,33 +62,43 @@ def extract_frames(video: Path, n: int = N_FRAMES, duration: float = 10.0) -> li
     return frames
 
 
-class _Video:
-    def __init__(self, client: NimClient, tally):
-        self.client, self.tally = client, tally
-
-    def analyze(self, bundle: ClaimBundle) -> VideoFinding:
-        frames = extract_frames(bundle.video)
-        text = f"""These {len(frames)} images are frames from one dashcam clip, in chronological order, taken at t = {', '.join(f'{t:.2f}' for t, _ in frames)} seconds.
+def video_prompt(times: list[float]) -> str:
+    """Frame + candidate-table prompt shared by every image-capable model."""
+    return f"""These {len(times)} images are frames from one dashcam clip, in chronological order, taken at t = {', '.join(f'{t:.2f}' for t in times)} seconds.
 The camera is mounted in the ego vehicle. Traffic in South Korea drives on the right.
 A collision between the ego vehicle and one other vehicle happens in the clip.
 
-In the candidate table below, the ego vehicle is always "vehicle B" and the other vehicle is "vehicle A".
-Choose the accident type codes that best match what happens. Consider the road layout, traffic signals,
-the direction each vehicle travels (straight, left turn, right turn, lane change, stopped...) and where they collide.
+Each row of the candidate table below describes two vehicles, "vehicle A" and "vehicle B".
+The ego vehicle can be either one: first decide what each vehicle does (straight, left turn, right turn,
+lane change, stopped, reversing, opening a door...), then pick the codes whose A/B descriptions match,
+and say which of A or B the ego vehicle is in your best code. Consider the road layout, traffic signals
+and where they collide. Decide who was moving from the background: if the background does not move, the ego vehicle is stopped.
 
 {candidate_table_en()}
 
 Return only this JSON:
-{{"top3": [code, code, code], "ego_movement": "...", "other_movement": "...", "road_type": "...", "evidence": "1-2 sentences in English citing frame times"}}"""
+{{"ego_movement": "...", "other_movement": "...", "road_type": "...", "top3": [code, code, code], "ego_role": "A or B", "evidence": "1-2 sentences in English citing frame times"}}"""
+
+
+class _Video:
+    def __init__(self, client: NimClient, tally, model: str = OMNI, max_tokens: int = 1024):
+        self.client, self.tally, self.model, self.max_tokens = client, tally, model, max_tokens
+
+    def analyze(self, bundle: ClaimBundle) -> VideoFinding:
+        frames = extract_frames(bundle.video)
         content = [{"type": "image_url", "image_url": {"url": _data_url(f, "image/jpeg")}} for _, f in frames]
-        content.append({"type": "text", "text": text})
-        resp = self.client.chat({"model": OMNI, "messages": [{"role": "user", "content": content}], "max_tokens": 1024,
-                                 "temperature": 0.2, "chat_template_kwargs": {"enable_thinking": False}},
-                                tag=f"video:{bundle.case_id}")
+        content.append({"type": "text", "text": video_prompt([t for t, _ in frames])})
+        payload = {"model": self.model, "messages": [{"role": "user", "content": content}],
+                   "max_tokens": self.max_tokens, "temperature": 0.2}
+        if self.model == OMNI:
+            payload["chat_template_kwargs"] = {"enable_thinking": False}
+        resp = self.client.chat(payload, tag=f"video:{self.model}:{bundle.case_id}")
         self.tally(resp)
         p = _parse_json(resp["choices"][0]["message"].get("content"))
         top3 = [int(c) for c in p.get("top3", []) if str(c).isdigit()]
-        return VideoFinding(top3=top3, scene={k: v for k, v in p.items() if k != "top3"}, source=OMNI)
+        role = str(p.get("ego_role", "B")).strip().upper()[:1]
+        return VideoFinding(top3=top3, scene={k: v for k, v in p.items() if k not in ("top3", "ego_role")}, source=self.model,
+                            ego_role=role if role in ("A", "B") else "B")
 
 
 class _Damage:
@@ -117,7 +127,7 @@ class _Writer:
     def write(self, result: ClaimResult) -> str:
         body = template_report(result)
         facts = {"사고유형": f"{result.fault.code} {result.fault.place} {result.fault.situation}",
-                 "상대차량": result.fault.a_progress, "청구차량": result.fault.b_progress,
+                 "상대차량": result.fault.other_progress, "청구차량": result.fault.claimant_progress,
                  "영상근거": result.video.scene.get("evidence", ""), "손상부위": result.damage.parts,
                  "권고": result.decision.route}
         resp = self.client.chat({"model": ULTRA, "max_tokens": 400, "temperature": 0.3, "messages": [

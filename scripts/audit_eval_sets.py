@@ -129,15 +129,26 @@ def audit_fault_set(raw: dict[str, dict]) -> None:
 
 
 def audit_synth(raw_videos: dict[str, dict]) -> None:
-    print("\n[3] synthetic cases vs raw damage labels and estimates")
+    print("\n[3] synthetic cases (reviewed clips only) vs raw damage labels and estimates")
     cases = [json.loads(l) for l in (INTERIM / "synth_cases.jsonl").open(encoding="utf-8")]
     manifest = {r["case_id"]: r for r in csv.DictReader((ROOT / "data" / "manifests" / "synth_cases.csv").open(encoding="utf-8"))}
-    eval_names = {r["video_name"] for r in csv.DictReader((ROOT / "data" / "manifests" / "eval_fault.csv").open(encoding="utf-8"))}
-    check(len(cases) == 150 and set(manifest) == {c["case_id"] for c in cases}, "150 cases, manifest ids match")
-    check(Counter(c["case_type"] for c in cases) == Counter(normal=90, inflated=30, contradiction=30), "type mix 90/30/30")
-    check(len({c["accident_id"] for c in cases}) == 150, "each damage accident used once")
-    check(len({c["video"]["video_name"] for c in cases}) == 150 and {c["video"]["video_name"] for c in cases} <= eval_names,
-          "each eval video used once")
+    review = {r["video_name"]: r for r in csv.DictReader((ROOT / "data" / "manifests" / "label_review.csv").open(encoding="utf-8"))}
+    usable = {n for n, r in review.items() if r["use"] == "1"}
+    n_cases = len(cases)
+    check(n_cases == len(usable) and set(manifest) == {c["case_id"] for c in cases},
+          f"{n_cases} cases = reviewed clips ({len(usable)}), manifest ids match")
+    check(Counter(c["case_type"] for c in cases) == Counter(normal=56, inflated=18, contradiction=18), "type mix 56/18/18")
+    check(len({c["accident_id"] for c in cases}) == n_cases, "each damage accident used once")
+    check({c["video"]["video_name"] for c in cases} == usable, "each reviewed clip used once, no excluded clip")
+    check(all(c["claimant"] == review[c["video"]["video_name"]]["ego_role"] for c in cases),
+          "claimant role == label review ego_role")
+    areas = {r["code"]: r for r in csv.DictReader((ROOT / "data" / "reference" / "collision_areas.csv").open(encoding="utf-8-sig"))}
+    check(all(c["claimant_impact_directions"] == sorted(areas[c["video"]["accident_type"]][
+        "a_areas" if c["claimant"] == "A" else "b_areas"].split(";")) for c in cases),
+          "claimant impact directions follow the claimant's role in collision_areas.csv")
+    check(all(int(c["video"]["ego_fault"]) == int(c["video"]["fault_b" if c["claimant"] == "B" else "fault_a"])
+              and int(c["video"]["ego_fault"]) + int(c["video"]["other_fault"]) == 100 for c in cases),
+          "claimant fault = fault of the claimant's role, shares sum to 100")
     check(all(c["accident_id"].startswith("sc-") for c in cases), "all SOCAR (sc-) accidents")
 
     ids = {c["accident_id"] for c in cases}

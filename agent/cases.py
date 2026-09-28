@@ -28,6 +28,11 @@ class GroundTruth:
     injected: list[str]              # names of injected estimate lines
     approved_total: int              # loss adjuster's approved amount (items, before VAT)
     real_adjusted: bool
+    claimant_role: str = "B"         # table vehicle of the filming car, from the label review
+
+    @property
+    def claimant_fault(self) -> int:
+        return self.fault_b if self.claimant_role == "B" else self.fault_a
 
 
 def _int(v) -> int:
@@ -60,6 +65,7 @@ def to_bundle(case: dict) -> tuple[ClaimBundle, GroundTruth]:
         accident_type=int(video["accident_type"]), fault_a=int(video["fault_a"]), fault_b=int(video["fault_b"]),
         photo_parts=list(case["photo_parts"]), injected=[i["name"] for i in case["injected_items"]],
         approved_total=int(case["approved_total"]), real_adjusted=bool(case["real_adjusted"]),
+        claimant_role=case.get("claimant", "B"),
     )
     return bundle, truth
 

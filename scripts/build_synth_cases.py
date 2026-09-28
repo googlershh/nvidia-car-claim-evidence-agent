@@ -1,18 +1,21 @@
 """Pair evaluation videos with damage photos + estimates into synthetic claims.
 
 The 597 videos and 581 damage photos come from different accidents, so each
-synthetic claim joins one fault-eval video (vehicle B, the filming car, is
-the claimant) with one SOCAR accident from VL_damage (photos + estimate with
-the loss adjuster's approved amounts). The video labels' damage_location is
-empty, so B's plausible impact directions come from
-data/reference/collision_areas.csv and photo parts are mapped with aihub.parts.
+synthetic claim joins one video of the reviewed fault-eval set (the filming car
+is the claimant) with one SOCAR accident from VL_damage (photos + estimate with
+the loss adjuster's approved amounts). Only clips whose label was confirmed on
+video are used (data/interim/eval_fault_reviewed.csv, scripts/build_eval_reviewed.py);
+there the claimant is table vehicle B, or A where the review found the roles
+swapped. The video labels' damage_location is empty, so the claimant's plausible
+impact directions come from data/reference/collision_areas.csv and photo parts
+are mapped with aihub.parts.
 
 Case types (fixed seed):
-    normal         photos consistent with B's impact directions
+    normal         photos consistent with the claimant's impact directions
     inflated       normal + 1~2 replacement items injected from another
                    estimate of the same car (parts facing no photographed
                    direction but plausible for the collision)
-    contradiction  photos facing none of B's impact directions (prefers
+    contradiction  photos facing none of the claimant's impact directions (prefers
                    high/medium confidence accident types)
 
 Expected route: contradiction -> siu; inflated, or a real adjustment in the
@@ -23,7 +26,7 @@ Outputs:
     data/interim/synth_cases.jsonl   full cases with ground truth
 
 Usage:
-    python scripts/build_synth_cases.py [--normal 90 --inflated 30 --contradiction 30] [--seed 42]
+    python scripts/build_synth_cases.py [--normal 56 --inflated 18 --contradiction 18] [--seed 42]
 """
 
 from __future__ import annotations
@@ -159,16 +162,20 @@ def pick_injection(case_items: list[dict], acc: dict, allowed: set[str], donors:
 
 def main() -> None:
     ap = argparse.ArgumentParser()
-    ap.add_argument("--normal", type=int, default=90)
-    ap.add_argument("--inflated", type=int, default=30)
-    ap.add_argument("--contradiction", type=int, default=30)
+    # 92 reviewed clips, split about 60/20/20 as before
+    ap.add_argument("--normal", type=int, default=56)
+    ap.add_argument("--inflated", type=int, default=18)
+    ap.add_argument("--contradiction", type=int, default=18)
     ap.add_argument("--seed", type=int, default=SEED)
     args = ap.parse_args()
     counts = {"normal": args.normal, "inflated": args.inflated, "contradiction": args.contradiction}
     rng = random.Random(args.seed)
 
     areas = load_collision_areas()
-    videos = [v for v in read_csv(INTERIM_DIR / "eval_fault.csv") if v["accident_type"] in areas]
+    reviewed = INTERIM_DIR / "eval_fault_reviewed.csv"
+    if not reviewed.exists():
+        raise SystemExit(f"{reviewed} missing; run scripts/build_eval_reviewed.py")
+    videos = [v for v in read_csv(reviewed) if v["accident_type"] in areas]
     if len(videos) < sum(counts.values()):
         raise SystemExit(f"only {len(videos)} eval videos with collision areas; need {sum(counts.values())}")
     videos = sorted(videos, key=lambda v: v["eval_id"])[:sum(counts.values())]
@@ -191,7 +198,7 @@ def main() -> None:
     used: set[str] = set()
     plan = []
     for v in videos:
-        allowed = areas[v["accident_type"]]["b"]
+        allowed = areas[v["accident_type"]][v["ego_role"].lower()]
         want = "contradiction" if types[v["eval_id"]] == "contradiction" else "consistent"
         pool = [aid for aid in acc_ids if aid not in used and fits(accidents[aid]["part_dirs"], allowed) == want]
         if not pool:
@@ -222,9 +229,9 @@ def main() -> None:
             "case_type": case_type,
             "expected_route": route,
             "video": {k: v[k] for k in ("eval_id", "video_name", "zip_place", "accident_type", "fault_a", "fault_b",
-                                        "a_progress", "b_progress", "point_of_view")},
-            "claimant": "B",
-            "b_impact_directions": sorted(allowed),
+                                        "a_progress", "b_progress", "point_of_view", "ego_fault", "other_fault")},
+            "claimant": v["ego_role"],
+            "claimant_impact_directions": sorted(allowed),
             "collision_confidence": areas[v["accident_type"]]["confidence"],
             "accident_id": aid,
             "car_name": acc["estimate"]["car_name"],

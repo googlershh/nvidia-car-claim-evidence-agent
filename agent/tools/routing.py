@@ -23,6 +23,6 @@ def route(fault: FaultAssessment, lines: list[LineCheck], anomalies: list[Anomal
     else:
         decision = "approve"
         reasons.append("사고유형과 손상 부위가 맞고, 사진에 없는 부위의 수리 청구가 없음")
-    payout = round(approved * (1 + VAT) * fault.fault_a / 100)
+    payout = round(approved * (1 + VAT) * fault.other_fault / 100)
     return Decision(route=decision, reasons=reasons, claimed_total=claimed, approved_total=approved,
                     payout_estimate=payout)
