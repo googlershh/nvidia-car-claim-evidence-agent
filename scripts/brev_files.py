@@ -21,9 +21,10 @@ RUNTIME = ["accident_codes.csv", "eval_fault_reviewed.csv", "synth_cases.jsonl",
 
 
 def main() -> None:
-    tracked = subprocess.run(["git", "-c", "safe.directory=*", "ls-files"], cwd=ROOT, check=True,
-                             capture_output=True, text=True).stdout.splitlines()
-    files = [f for f in tracked if not f.startswith("proposals/")]
+    # -z and core.quotepath=off: keep non-ASCII paths (the Korean submission PDF) unquoted
+    tracked = subprocess.run(["git", "-c", "safe.directory=*", "-c", "core.quotepath=off", "ls-files", "-z"], cwd=ROOT,
+                             check=True, capture_output=True, text=True, encoding="utf-8").stdout.split("\0")
+    files = [f for f in tracked if f and not f.startswith("proposals/")]
     files += [f"data/interim/{name}" for name in RUNTIME]
     for line in (INTERIM / "synth_cases.jsonl").open(encoding="utf-8"):
         case = json.loads(line)

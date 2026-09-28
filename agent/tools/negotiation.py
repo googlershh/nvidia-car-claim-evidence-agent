@@ -27,9 +27,13 @@ def dispute_likelihood(r: ClaimResult) -> tuple[str, list[str]]:
     elif cp.verdict == "consistent":
         reasons.append("상대 보험사 주장이 영상 판단과 같은 도표·기본과실")
     elif cp.verdict == "needs_video":
-        level = "medium"
-        reasons.append(f"수정요소 주장({', '.join(m.name for m in cp.modifiers_to_verify)})이 남아 있음: "
-                       "영상 재조사 결과로 해소 가능")
+        checked = {c.name: c.verdict for c in r.modifier_checks}
+        open_ = [m.name for m in cp.modifiers_to_verify if checked.get(m.name) not in ("confirmed", "not_seen")]
+        if open_:
+            level = "medium"
+            reasons.append(f"수정요소 주장({', '.join(open_)})이 영상으로 확인되지 않은 채 남아 있음")
+        else:
+            reasons.append("상대 보험사의 수정요소 주장을 영상으로 모두 확인함(확인/미확인 결과를 근거로 제시)")
     else:
         gap = abs(cp.claimed_insured_fault - ours)
         level = "high" if gap >= 20 else "medium"
@@ -41,16 +45,23 @@ def dispute_likelihood(r: ClaimResult) -> tuple[str, list[str]]:
     return level, reasons
 
 
+CHECK_KO = {"confirmed": "영상에서 확인", "not_seen": "영상에서 확인되지 않음", "unclear": "영상으로 판단 불가"}
+
+
 def _modifier_rows(r: ClaimResult, cp: StatementCheck | None) -> list[str]:
     claimed = {m.name for m in cp.modifiers_to_verify} if cp else set()
+    checked = {c.name: c for c in r.modifier_checks}
     rows = []
     insured_role = "A" if r.fault.claimant_role == "B" else "B"
     for role, name, value in code_modifiers(r.fault.code):
-        if name in GENERIC and name not in claimed:
+        if name in GENERIC and name not in claimed and name not in checked:
             continue
         who = "당사 피보험자" if role == insured_role else "귀사 고객"
-        status = "귀사 주장, 영상 확인 전" if name in claimed else "영상 확인 전"
-        rows.append(f"| {who} | {name} | {value:+d} | {status} | - |")
+        c = checked.get(name)
+        status = CHECK_KO.get(c.verdict, c.verdict) if c else "영상 확인 전"
+        if name in claimed:
+            status = f"귀사 주장, {status}"
+        rows.append(f"| {who} | {name} | {value:+d} | {status} | {c.evidence if c and c.evidence else '-'} |")
     return rows
 
 

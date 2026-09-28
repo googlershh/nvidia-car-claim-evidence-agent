@@ -1,8 +1,8 @@
 #!/usr/bin/env bash
 # Deploy the VSS base profile: Cosmos3 Nano Reasoner served locally on the GPU, LLM from build.nvidia.com.
 # Run ON THE INSTANCE after ~/.nvidia_keys exists. The NVIDIA API key also logs in to nvcr.io (NGC).
-#   bash scripts/brev/02_deploy_vss.sh        # deploy
-#   bash scripts/brev/02_deploy_vss.sh -d     # dry run (prints the compose command and images)
+#   bash scripts/brev/01_deploy_vss.sh        # deploy
+#   bash scripts/brev/01_deploy_vss.sh -d     # dry run (prints the compose command and images)
 set -uo pipefail
 source ~/.nvidia_keys
 REPO="$HOME/video-search-and-summarization"

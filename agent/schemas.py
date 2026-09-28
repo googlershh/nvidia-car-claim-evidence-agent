@@ -124,6 +124,14 @@ class StatementCheck:
 
 
 @dataclass
+class ModifierCheck:
+    """A fault standard modifier re-checked on video (e.g. with vss-ask-video)."""
+    name: str
+    verdict: str                     # confirmed | not_seen | unclear
+    evidence: str = ""               # what the video shows, with timestamps
+
+
+@dataclass
 class DamageFinding:
     parts: list[str]                 # damaged parts seen in photos
     directions: set[str]
@@ -175,6 +183,7 @@ class ClaimResult:
     decision: Decision
     report_md: str
     statement_checks: list[StatementCheck] = field(default_factory=list)
+    modifier_checks: list[ModifierCheck] = field(default_factory=list)
     negotiation_md: str = ""         # evidence letter to the counterparty insurer (+ internal notes)
     status: str = "pending_approval"
     trace: list[StageTrace] = field(default_factory=list)
