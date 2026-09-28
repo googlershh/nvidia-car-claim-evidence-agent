@@ -14,7 +14,8 @@ GPU 인스턴스 한 대에 VSS Blueprint와 NemoClaw를 함께 올리는 절차
 | 3 | 인스턴스 | `bash scripts/brev/01_deploy_vss.sh` (모의 실행은 `-d`. 컨테이너 약 38GB, 20분 남짓) |
 | 4 | 인스턴스 | `bash scripts/brev/02_connect_nemoclaw_vss.sh` (NemoClaw 설치 + VSS 연결 + 복구, 20~30분) |
 | 5 | 인스턴스 | `bash scripts/brev/03_install_claim_skill.sh demo` (우리 `claim-evidence` 스킬과 도구 코드 설치) |
-| 6 | 인스턴스 | `bash scripts/brev/vss_ask_clip.sh F016` (VSS 동작 확인) |
+| 6 | 인스턴스 | (권장) OpenRouter 키를 키 파일에 추가한 뒤 `bash scripts/brev/04_use_openrouter.sh demo` (에이전트·VSS LLM을 유료 엔드포인트로, P10 대응) |
+| 7 | 인스턴스 | `bash scripts/brev/vss_ask_clip.sh F016` (VSS 동작 확인) |
 
 접속은 `brev shell claim-agent-a6000`. 스크립트는 저장소 루트(`~/car-accident-model`)에서 실행합니다.
 
@@ -50,6 +51,8 @@ build.nvidia.com 키(`nvapi-`)가 NGC 레지스트리(`nvcr.io`) 로그인에도
 | P10 | 에이전트가 "The AI service is temporarily overloaded" | build.nvidia.com 무료 엔드포인트 과부하. 에이전트는 목표 하나에 모델을 10번 넘게 부름 | 유료 엔드포인트(OpenRouter 등)나 자체 서빙으로 전환 검토 |
 | P11 | 설정을 고친 뒤에도 에이전트가 예전 실패를 답함 | 같은 대화 세션의 기억 | 시험할 때 `openclaw agent --session-id <새 id>` |
 | P12 | 완료를 기다리는 감시 작업이 끝나지 않음 | `pgrep -f 이름`이 검사 명령 자신과 일치 | 프로세스 대신 로그의 완료 표식으로 판단 |
+| P13 | `nemoclaw inference set --provider openrouter` → "provider 'openrouter-api' not found" | OpenRouter 제공자는 온보딩 마법사에서만 등록됨 | `openshell provider create --type openai …`로 직접 등록 후 `inference set`(`04_use_openrouter.sh`) |
+| P14 | OpenRouter에서도 "API rate limit reached" | 유료 모델도 업스트림 한도에 걸림(원인 미확인) | 같은 세션 id로 이어서 실행하면 앞 단계 결과를 다시 쓴다 |
 
 ## 비용
 

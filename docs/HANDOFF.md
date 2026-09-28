@@ -458,6 +458,14 @@ VSS 스킬은 API가 아니라 **에이전트가 따르는 작업 절차서**다
 - **막힌 점: 무료 엔드포인트 과부하(P10).** C006 전체 흐름 시험에서 에이전트(Nemotron 3 Super / 3.5 Lightning)와 VSS 에이전트의 LLM(3.5 Lightning)이 모두 build.nvidia.com "Service temporarily overloaded"(503)로 실패했다. 새 샌드박스 상태 점검도 Super 업스트림을 unhealthy(503)로 보고했다.
   - 대안: OpenRouter 유료 Nemotron 3 Super(입력 $0.08/M, 출력 $0.45/M, 2026-09-28 OpenRouter 모델 목록 확인, NemoClaw가 openrouter 제공자 지원). 에이전트 1건에 호출 약 15회 × 2~3만 토큰 → 건당 약 $0.03~0.04 추정. Super는 120B라 4비트도 약 65GB라 A6000에는 불가, DGX Spark는 가능.
 
+**OpenRouter 전환과 에이전트 첫 완주 (2026-09-28).** `scripts/brev/04_use_openrouter.sh`.
+- 사용자가 OpenRouter 키를 인스턴스 `~/.nvidia_keys`에 직접 추가(`OPENROUTER_API_KEY`, `sk-or-`). `nemoclaw inference set --provider openrouter`는 온보딩에서만 등록되는 제공자라 거부됐다 → OpenShell에 OpenAI 형식 제공자 `openrouter-api`(base `https://openrouter.ai/api/v1`, 키는 환경변수 조회)를 직접 등록하고 샌드박스 경로를 Nemotron 3 Super로 전환. 샌드박스는 그대로.
+- VSS 에이전트 LLM도 OpenRouter `nvidia/nemotron-3.5-lightning`(openai 프로필, `LLM_BASE_URL=https://openrouter.ai/api`)로 전환, vss-agent만 재생성. F016 질문에 "회색 세단이 방향지시등 없이 자차 앞 차로로 끼어듦".
+- **C006 에이전트 완주**: 목표 한 줄("이 건 상대 보험사와 정비공장에 보낼 협의 근거를 만들어줘")만 주자 OpenClaw 에이전트가 스킬을 읽고 `case` → VSS 영상 설명 → `candidates` → `fault 11`(차43-2) → `estimate` → VSS에 "0~5초 방향지시등?" 등 구간 질문 여러 번(수정요소 재조사) → `anomaly` → `letter`까지 스스로 실행해 협의 문서와 사정서를 만들었다(약 6분, 도구 호출 약 20회). 마지막 한국어 요약 단계에서 OpenRouter "API rate limit reached"로 두 번 끊겼다. 산출물과 대화 기록은 `outputs/agent_runs/C006/`(git 제외).
+  - 협의 문서 4절에 영상 확인 결과가 들어갔다: "진로변경 신호불이행·지연 +10: 영상에서 확인, 0~5초 방향지시등 미점등", 버스전용차로·고속도로 추월차로: 확인되지 않음.
+  - **판단은 검수 라벨과 반대**: 에이전트는 촬영 차량을 A(후행 직진)로 봤고, 라벨은 B(선행 진로변경)다. 그 결과 과실이 당사:귀사 70:30으로 뒤집혔고(라벨 기준 30:70), 상대 보험사의 역할 반대 주장을 "일치", 피보험자 진술을 "영상과 다름"으로 판정했으며, 뒤범퍼 사진을 충돌 부위 모순으로 봤다. 다만 이 영상(F007)은 검수에서 확신도 "낮음"(흰 SUV가 자차 왼쪽으로 붙어 지나가며 접촉)이라 어느 쪽이 맞는지 사람이 다시 봐야 한다. **영상 판정 정확도는 여전히 측정 전이다.**
+- 비용: OpenRouter 사용액 누적 약 $0.07(키 조회 기준).
+
 ### 7.4 이후 순서
 2차 다운로드: 597 VS 3개 장소(합계 8.5GB, 검증 세트라 "학습에 안 쓴 데이터로 평가" 주장 가능) → 3차: 581 `VS_damage`, `VS_damage_part`(5.6GB).
 
