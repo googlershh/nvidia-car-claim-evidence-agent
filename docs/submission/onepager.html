@@ -4,13 +4,13 @@
 <meta charset="utf-8">
 <title>협의 근거 에이전트</title>
 <style>
-  @page { size: A4; margin: 11mm 12mm; }
+  @page { size: A4; margin: 9mm 12mm; }
   :root { --ink:#1b1f24; --sub:#57606a; --line:#d0d7de; --nv:#76b900; --nv-d:#4d7a00; --blue:#0969da; --amber:#9a6700; }
   * { box-sizing: border-box; }
-  body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: var(--ink); margin: 0; font-size: 9.2pt; line-height: 1.42; background:#fff; }
+  body { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; color: var(--ink); margin: 0; font-size: 9pt; line-height: 1.4; background:#fff; }
   h1 { font-size: 17pt; margin: 0; letter-spacing: -0.3px; }
   .tag { color: var(--sub); font-size: 9pt; margin: 2px 0 8px; }
-  h2 { font-size: 10.5pt; margin: 9px 0 4px; padding-left: 7px; border-left: 4px solid var(--nv); }
+  h2 { font-size: 10.5pt; margin: 8px 0 4px; padding-left: 7px; border-left: 4px solid var(--nv); }
   p { margin: 0 0 4px; }
   .grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
   ul { margin: 2px 0 4px; padding-left: 16px; }
@@ -28,7 +28,8 @@ GitHub: <b id="repo">https://github.com/googlershh/nvidia-car-claim-evidence-age
 <div class="grid">
 <div>
 <h2>문제</h2>
-<p>대물보상 담당자는 사고 한 건을 끝내려면 상대 보험사와 <b>과실</b>, 정비공장과 <b>수리비</b>를 모두 합의해야 합니다. 합의가 안 되면 보험사가 분쟁심의를 청구하는데, 청구는 <span class="num">2024년 약 15.7만 건</span>이고 소심의에 평균 <span class="num">61일</span>이 걸립니다. 그런데 심의 결정의 <span class="num">95%</span>가 그대로 받아들여집니다(2018). 결론은 인정기준으로 예측되는데, 상대가 받아들일 근거를 갖추지 못해 두 달을 기다리는 셈입니다.</p>
+<p><b>대물보상 담당자가 상대가 받아들일 협의 근거를 만들기 어려워, 결론이 예측되는 사고도 분쟁심의로 두 달 가까이 늦어집니다.</b></p>
+<p>담당자는 사고 한 건마다 상대 보험사와 <b>과실비율</b>, 정비공장과 <b>수리비</b>를 합의해야 합니다. 합의가 안 되면 분쟁심의로 가는데, <span class="num">2024년 약 15.7만 건</span>이고 소심의만 평균 <span class="num">61일</span>이 걸립니다. 심의 결정의 <span class="num">95%</span>가 그대로 받아들여질 만큼 결론은 인정기준으로 예측되지만, 적용 도표·영상 속 시각·진술과의 차이 같은 근거를 일일이 만들기 어려워 협의가 길어집니다.</p>
 </div>
 <div>
 <h2>해결</h2>
@@ -42,67 +43,144 @@ GitHub: <b id="repo">https://github.com/googlershh/nvidia-car-claim-evidence-age
 </div>
 
 <h2>NVIDIA 스택 구성</h2>
-<svg viewBox="0 0 760 360" width="100%" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="스택 다이어그램">
+<svg viewBox="0 0 760 384" width="100%" xmlns="http://www.w3.org/2000/svg" xmlns:xlink="http://www.w3.org/1999/xlink" role="img" aria-label="스택 다이어그램">
+  <style>
+    .t  { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; fill: #f2f2f2; font-size: 10.5px; text-anchor: middle; }
+    .s  { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; fill: #a8adb3; font-size: 9px; text-anchor: middle; }
+    .h  { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; fill: #ffffff; font-size: 12.5px; font-weight: 700; }
+    .e  { font-family: "Malgun Gothic", "Apple SD Gothic Neo", sans-serif; fill: #e6e6e6; font-size: 9px; font-style: italic;
+          paint-order: stroke; stroke: #0b0b0b; stroke-width: 5px; stroke-linejoin: round; }
+    .ln { stroke: #e6e6e6; stroke-width: 1.3; fill: none; }
+  </style>
   <defs>
-    <marker id="a" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto"><path d="M0,0 L10,5 L0,10 z" fill="#57606a"/></marker>
+    <marker id="arw" viewBox="0 0 10 10" refX="9" refY="5" markerWidth="6" markerHeight="6" orient="auto-start-reverse">
+      <path d="M0,0 L10,5 L0,10 z" fill="#e6e6e6"/>
+    </marker>
+    <!-- NVIDIA model (NIM) hexagon -->
+    <g id="nim">
+      <polygon points="0,-20 22.5,-7 22.5,19 0,32 -22.5,19 -22.5,-7" fill="#4f7d00"/>
+      <polygon points="0,-26 22.5,-13 22.5,13 0,26 -22.5,13 -22.5,-13" fill="#0f0f0f" stroke="#76b900" stroke-width="2.5"/>
+      <g stroke="#76b900" stroke-width="1.3" fill="none">
+        <polygon points="0,-12 10.4,-6 10.4,6 0,12 -10.4,6 -10.4,-6"/>
+        <line x1="0" y1="-12" x2="0" y2="12"/><line x1="10.4" y1="-6" x2="-10.4" y2="6"/><line x1="10.4" y1="6" x2="-10.4" y2="-6"/>
+      </g>
+      <g fill="#76b900">
+        <circle r="3.2"/><circle cx="0" cy="-12" r="2.2"/><circle cx="10.4" cy="-6" r="2.2"/><circle cx="10.4" cy="6" r="2.2"/>
+        <circle cx="0" cy="12" r="2.2"/><circle cx="-10.4" cy="6" r="2.2"/><circle cx="-10.4" cy="-6" r="2.2"/>
+      </g>
+    </g>
+    <!-- process (yellow) -->
+    <rect id="yl" x="-22" y="-22" width="44" height="44" rx="3" fill="#f5c400"/>
+    <!-- data (orange) -->
+    <rect id="or" x="-22" y="-22" width="44" height="44" rx="3" fill="#e5641b"/>
+    <!-- glyphs -->
+    <g id="g-gear" fill="none" stroke="#fff">
+      <circle r="10" stroke-width="4.5" stroke-dasharray="3.9 3.95"/><circle r="8" stroke-width="2"/><circle r="3.5" stroke-width="2"/>
+    </g>
+    <g id="g-doc" fill="none" stroke="#fff" stroke-width="2">
+      <path d="M-9,-13 H4 L10,-7 V13 H-9 Z"/><path d="M4,-13 V-7 H10"/>
+      <line x1="-5" y1="-3" x2="6" y2="-3"/><line x1="-5" y1="2" x2="6" y2="2"/><line x1="-5" y1="7" x2="2" y2="7"/>
+    </g>
+    <g id="g-lens" fill="none" stroke="#fff" stroke-width="2.6" stroke-linecap="round">
+      <circle cx="-3" cy="-3" r="8"/><line x1="3" y1="3" x2="11" y2="11"/>
+    </g>
+    <g id="g-book" fill="none" stroke="#fff" stroke-width="2">
+      <path d="M0,-9 C-4,-12 -9,-12 -12,-10 V10 C-9,8 -4,8 0,11 C4,8 9,8 12,10 V-10 C9,-12 4,-12 0,-9 Z"/><line x1="0" y1="-9" x2="0" y2="11"/>
+    </g>
+    <g id="g-files" fill="none" stroke="#fff" stroke-width="2">
+      <rect x="-12" y="-8" width="17" height="14" rx="1.5"/><rect x="-5" y="-2" width="17" height="14" rx="1.5" fill="#e5641b"/>
+      <circle cx="0" cy="3" r="2" fill="#fff" stroke="none"/><path d="M-3,11 L3,5 L7,9 L9,7 L12,10"/>
+    </g>
+    <g id="g-talk" fill="none" stroke="#fff" stroke-width="2">
+      <path d="M-12,-10 H8 V3 H-4 L-9,8 V3 H-12 Z"/><path d="M11,-5 H13 V9 H10 V13 L5,9 H-3"/>
+    </g>
+    <g id="g-video" fill="none" stroke="#fff" stroke-width="2">
+      <rect x="-12" y="-9" width="24" height="18" rx="2"/><path d="M-3,-4 L5,0 L-3,4 Z" fill="#fff"/>
+    </g>
+    <g id="g-db" fill="none" stroke="#fff" stroke-width="2">
+      <ellipse cx="0" cy="-8" rx="10" ry="4"/><path d="M-10,-8 V8 C-10,13 10,13 10,8 V-8"/><path d="M-10,0 C-10,5 10,5 10,0"/>
+    </g>
   </defs>
-  <!-- runtime frame -->
-  <rect x="8" y="58" width="744" height="270" rx="10" fill="#f6f8fa" stroke="#76b900" stroke-width="2" stroke-dasharray="6 4"/>
-  <text x="20" y="76" font-size="11" font-weight="700" fill="#4d7a00">OpenShell 샌드박스 · NemoClaw — 네트워크 기본 차단, 필요한 목적지만 허용, 자격증명은 샌드박스 밖</text>
+
+  <rect x="0" y="0" width="760" height="384" rx="10" fill="#0b0b0b"/>
+  <text class="h" x="18" y="26">Agent Pipeline</text>
+
+  <!-- OpenShell sandbox -->
+  <rect x="128" y="36" width="620" height="212" rx="8" fill="none" stroke="#76b900" stroke-width="1.4" stroke-dasharray="6 4"/>
+  <text x="140" y="52" style="font-family:'Malgun Gothic',sans-serif;font-size:9.5px;font-weight:700;fill:#8fd11a">OpenShell 샌드박스 · NemoClaw — 네트워크 기본 차단, 필요한 목적지만 허용, 자격증명은 샌드박스 밖</text>
 
   <!-- user -->
-  <rect x="270" y="6" width="220" height="36" rx="8" fill="#1b1f24"/>
-  <text x="380" y="29" font-size="12" fill="#fff" text-anchor="middle" font-weight="700">대물보상 담당자 (목표 입력 · 최종 승인)</text>
-  <line x1="380" y1="42" x2="380" y2="92" stroke="#57606a" stroke-width="1.5" marker-end="url(#a)"/>
+  <circle cx="52" cy="192" r="21" fill="#1a73e8"/>
+  <circle cx="52" cy="185" r="6.5" fill="#fff"/><path d="M40,203 C40,191 64,191 64,203 Z" fill="#fff"/>
+  <text class="t" x="52" y="228">대물보상 담당자</text>
+  <text class="s" x="52" y="240">목표 입력 · 최종 승인</text>
 
-  <!-- agent -->
-  <rect x="210" y="92" width="340" height="46" rx="8" fill="#fff" stroke="#1b1f24" stroke-width="1.5"/>
-  <text x="380" y="111" font-size="12" text-anchor="middle" font-weight="700">OpenClaw 에이전트 (NemoClaw 하네스)</text>
-  <text x="380" y="128" font-size="10" text-anchor="middle" fill="#57606a">계획·도구 호출: Nemotron 3 Super (NIM, build.nvidia.com)</text>
+  <!-- goal row -->
+  <line class="ln" x1="74" y1="192" x2="172" y2="192" marker-end="url(#arw)"/>
+  <text class="e" x="118" y="195" text-anchor="middle">목표 한 줄</text>
 
-  <!-- tools row -->
-  <g font-size="10" text-anchor="middle">
-    <rect x="24" y="160" width="136" height="54" rx="7" fill="#fff" stroke="#d0d7de"/>
-    <text x="92" y="180" font-weight="700">영상 분석</text><text x="92" y="196" fill="#57606a">사고유형·진행·충돌</text><text x="92" y="209" fill="#57606a">시각 근거</text>
-    <rect x="170" y="160" width="136" height="54" rx="7" fill="#fff" stroke="#d0d7de"/>
-    <text x="238" y="180" font-weight="700">인정기준 조회</text><text x="238" y="196" fill="#57606a">제10차 도표 108개</text><text x="238" y="209" fill="#57606a">수정요소 829개</text>
-    <rect x="316" y="160" width="136" height="54" rx="7" fill="#fff" stroke="#d0d7de"/>
-    <text x="384" y="180" font-weight="700">진술 대조</text><text x="384" y="196" fill="#57606a">피보험자·상대 보험사</text><text x="384" y="209" fill="#57606a">주장 vs 영상</text>
-    <rect x="462" y="160" width="136" height="54" rx="7" fill="#fff" stroke="#d0d7de"/>
-    <text x="530" y="180" font-weight="700">손해액·이상징후</text><text x="530" y="196" fill="#57606a">사진↔견적 대조</text><text x="530" y="209" fill="#57606a">충돌부위 모순→SIU</text>
-    <rect x="608" y="160" width="136" height="54" rx="7" fill="#fff" stroke="#d0d7de"/>
-    <text x="676" y="180" font-weight="700">문서 작성</text><text x="676" y="196" fill="#57606a">협의 근거·조정 요청</text><text x="676" y="209" fill="#57606a">SIU 메모·사정서</text>
-  </g>
-  <line x1="380" y1="138" x2="380" y2="150" stroke="#57606a" stroke-width="1.5"/>
-  <line x1="92" y1="150" x2="676" y2="150" stroke="#57606a" stroke-width="1.5"/>
-  <g stroke="#57606a" stroke-width="1.5" marker-end="url(#a)">
-    <line x1="92" y1="150" x2="92" y2="160"/><line x1="238" y1="150" x2="238" y2="160"/><line x1="384" y1="150" x2="384" y2="160"/><line x1="530" y1="150" x2="530" y2="160"/><line x1="676" y1="150" x2="676" y2="160"/>
-  </g>
+  <use href="#nim" xlink:href="#nim" transform="translate(200,188)"/>
+  <text class="t" x="200" y="232">OpenClaw 에이전트</text>
+  <text class="s" x="200" y="244">Nemotron 3 Super</text>
 
-  <!-- model services -->
-  <rect x="24" y="232" width="282" height="84" rx="8" fill="#eef7dd" stroke="#76b900"/>
-  <text x="165" y="251" font-size="11" text-anchor="middle" font-weight="700" fill="#4d7a00">VSS Blueprint (GPU 자체 서빙)</text>
-  <text x="165" y="268" font-size="10" text-anchor="middle">Cosmos3 Nano Reasoner (NIM) — 영상 이해</text>
-  <text x="165" y="283" font-size="10" text-anchor="middle">VSS Agent (NeMo Agent Toolkit) · VST 영상 저장</text>
-  <text x="165" y="298" font-size="10" text-anchor="middle">vss-ask-video 등 VSS 스킬 → 수정요소 재조사</text>
-  <line x1="92" y1="214" x2="92" y2="232" stroke="#57606a" stroke-width="1.5" marker-end="url(#a)"/>
+  <line class="ln" x1="228" y1="192" x2="296" y2="192" marker-end="url(#arw)"/>
+  <use href="#yl" xlink:href="#yl" transform="translate(320,192)"/><use href="#g-gear" xlink:href="#g-gear" transform="translate(320,192)"/>
+  <text class="t" x="320" y="232">claim-evidence 스킬</text>
+  <text class="s" x="320" y="244">계획 · 도구 선택</text>
 
-  <rect x="316" y="232" width="282" height="84" rx="8" fill="#e8f1fc" stroke="#0969da"/>
-  <text x="457" y="251" font-size="11" text-anchor="middle" font-weight="700" fill="#0969da">build.nvidia.com NIM API</text>
-  <text x="457" y="268" font-size="10" text-anchor="middle">Nemotron 3 Super · Nemotron 3.5 Lightning</text>
-  <text x="457" y="283" font-size="10" text-anchor="middle">Nemotron 3 Ultra (한국어 문서) · Nano Omni</text>
-  <text x="457" y="298" font-size="10" text-anchor="middle">DeepSeek-V4.1-Flash (프레임 판정 비교)</text>
+  <line class="ln" x1="344" y1="192" x2="408" y2="192" marker-end="url(#arw)"/>
+  <rect x="410" y="152" width="318" height="88" rx="6" fill="#2a2d31"/>
+  <use href="#or" xlink:href="#or" transform="translate(470,184)"/><use href="#g-book" xlink:href="#g-book" transform="translate(470,184)"/>
+  <text class="t" x="470" y="220">과실비율 인정기준</text><text class="s" x="470" y="232">제10차 · 도표 108개</text>
+  <use href="#or" xlink:href="#or" transform="translate(575,184)"/><use href="#g-files" xlink:href="#g-files" transform="translate(575,184)"/>
+  <text class="t" x="575" y="220">사고 자료</text><text class="s" x="575" y="232">영상 · 사진 · 견적서</text>
+  <use href="#or" xlink:href="#or" transform="translate(675,184)"/><use href="#g-talk" xlink:href="#g-talk" transform="translate(675,184)"/>
+  <text class="t" x="675" y="220">진술 · 주장</text><text class="s" x="675" y="232">피보험자 · 상대사</text>
 
-  <rect x="608" y="232" width="136" height="84" rx="8" fill="#fff8e5" stroke="#9a6700"/>
-  <text x="676" y="251" font-size="11" text-anchor="middle" font-weight="700" fill="#9a6700">근거 데이터</text>
-  <text x="676" y="268" font-size="9.5" text-anchor="middle">과실비율 인정기준</text>
-  <text x="676" y="282" font-size="9.5" text-anchor="middle">AI Hub 사고 영상</text>
-  <text x="676" y="296" font-size="9.5" text-anchor="middle">파손 사진·견적서</text>
-  <text x="676" y="310" font-size="9.5" text-anchor="middle">(쏘카 손해사정 결과)</text>
+  <!-- response row -->
+  <path class="ln" d="M728,172 H738 V96 H702" marker-end="url(#arw)"/>
+  <use href="#yl" xlink:href="#yl" transform="translate(678,96)"/><use href="#g-lens" xlink:href="#g-lens" transform="translate(678,96)"/>
+  <text class="t" x="678" y="132">과실 · 손해액 판단</text>
+  <text class="s" x="678" y="144">도표 · 진술 · 사진 대조</text>
+
+  <line class="ln" x1="654" y1="96" x2="546" y2="96" marker-end="url(#arw)"/>
+  <use href="#yl" xlink:href="#yl" transform="translate(522,96)"/><use href="#g-doc" xlink:href="#g-doc" transform="translate(522,96)"/>
+  <text class="t" x="522" y="132">협의 근거 문서</text>
+  <text class="s" x="522" y="144">조정 요청 · SIU 메모</text>
+
+  <path class="ln" d="M498,96 H52 V169" marker-end="url(#arw)"/>
+  <text class="e" x="300" y="99" text-anchor="middle">초안 → 담당자 승인 후 발송</text>
+
+  <!-- agent <-> VSS -->
+  <line class="ln" x1="192" y1="252" x2="192" y2="270" marker-end="url(#arw)"/>
+  <line class="ln" x1="208" y1="270" x2="208" y2="252" marker-end="url(#arw)"/>
+  <text class="e" x="186" y="265" text-anchor="end">구간 질문 (수정요소 재조사)</text>
+  <text class="e" x="214" y="265" text-anchor="start">영상 속 사실 · 시각</text>
+
+  <!-- video pipeline -->
+  <text class="h" x="18" y="290">Video Pipeline</text><text x="18" y="304" style="font-family:'Malgun Gothic',sans-serif;font-size:9.5px;fill:#8fd11a">VSS Blueprint</text>
+
+  <use href="#or" xlink:href="#or" transform="translate(690,306)"/><use href="#g-video" xlink:href="#g-video" transform="translate(690,306)"/>
+  <text class="t" x="690" y="342">블랙박스 영상</text><text class="s" x="690" y="354">mp4 → H.264</text>
+  <line class="ln" x1="668" y1="306" x2="564" y2="306" marker-end="url(#arw)"/>
+  <text class="e" x="616" y="309" text-anchor="middle">upload</text>
+
+  <use href="#or" xlink:href="#or" transform="translate(540,306)"/><use href="#g-db" xlink:href="#g-db" transform="translate(540,306)"/>
+  <text class="t" x="540" y="342">VST 영상 저장</text><text class="s" x="540" y="354">센서 · 클립</text>
+  <line class="ln" x1="518" y1="306" x2="418" y2="306" marker-end="url(#arw)"/>
+  <text class="e" x="468" y="309" text-anchor="middle">clip</text>
+
+  <use href="#nim" xlink:href="#nim" transform="translate(390,302)"/>
+  <text class="t" x="390" y="346">Cosmos3 Nano Reasoner</text><text class="s" x="390" y="358">영상 이해 · GPU 자체 서빙(NIM)</text>
+  <line class="ln" x1="362" y1="306" x2="228" y2="306" marker-end="url(#arw)"/>
+  <text class="e" x="295" y="309" text-anchor="middle">video_understanding</text>
+
+  <use href="#nim" xlink:href="#nim" transform="translate(200,302)"/>
+  <text class="t" x="200" y="346">VSS 에이전트</text><text class="s" x="200" y="358">NeMo Agent Toolkit · Nemotron 3.5 Lightning</text>
 
   <!-- hardware -->
-  <rect x="8" y="334" width="744" height="22" rx="6" fill="#1b1f24"/>
-  <text x="380" y="349" font-size="10.5" fill="#fff" text-anchor="middle">개발: Brev RTX A6000 48GB (VSS + NemoClaw 한 인스턴스)  →  본선: DGX Spark 로컬 서빙 · 사고 영상은 장비 밖으로 나가지 않음</text>
+  <rect x="8" y="364" width="744" height="16" rx="4" fill="#1d2126"/>
+  <text x="380" y="375.5" style="font-family:'Malgun Gothic',sans-serif;font-size:9px;fill:#d0d4d8;text-anchor:middle">실행 환경: Brev RTX A6000 48GB 한 대에 VSS + NemoClaw · 사고 영상은 같은 GPU의 Cosmos3가 분석 · 모델 API: OpenRouter · build.nvidia.com</text>
 </svg>
 
 <div class="grid">
@@ -133,17 +211,18 @@ GitHub: <b id="repo">https://github.com/googlershh/nvidia-car-claim-evidence-age
   <li>검수된 평가 세트 92건, 합성 사고 건(영상+사진+견적+진술)과 정답</li>
   <li>인정기준 도표 매핑, 진술 대조, 협의 근거 문서·분쟁심의 가능성, 손해액 검증·SIU 라우팅</li>
   <li>Brev A6000에 VSS(Cosmos3)와 NemoClaw 배포, 사고 영상 질의응답 동작 확인</li>
+  <li>도구를 NemoClaw 스킬로 설치: 에이전트가 목표 한 줄로 조사 순서를 정하고, 수정요소마다 VSS에 영상 구간을 다시 물어 협의 문서에 반영 (C006: 약 6분, 도구 호출 약 20회)</li>
 </ul>
 </div>
 <div>
 <b>진행 중</b>
 <ul>
-  <li>NemoClaw 에이전트가 스킬로 전체 흐름을 계획·실행하도록 전환(현재는 고정 순서 파이프라인)</li>
-  <li>수정요소별 영상 재조사 루프(VSS 스킬 연결)</li>
-  <li>영상 모델의 사고유형 판정 정확도 측정(현재 소표본 시험만 완료)</li>
+  <li>영상 모델의 사고유형·역할 판정 정확도 측정(현재 소표본). C006은 역할 판단이 확신도 낮은 검수 라벨과 달라 재확인 중</li>
+  <li>담당자용 데모 화면: 사고 건 선택 → 에이전트 단계·도구 호출 → 협의 문서 → 승인</li>
 </ul>
+
 </div>
 </div>
-<div class="foot">통계 출처: 보험연구원 「자동차보험 민원·소송 현황과 제도개선 방향」(2026) 인용 보도, 과실비율분쟁심의위원회. 과실 판정은 "초안 + 근거 + 사람 승인"을 원칙으로 합니다.</div>
+<div class="foot">통계 출처: 보험연구원 「자동차보험 민원·소송 현황과 제도개선 방향」(2026) 인용 보도, 과실비율분쟁심의위원회. 무료 모델 API가 과부하(503)로 자주 막혀 OpenRouter 유료 경로를 씁니다. 과실 판정은 "초안 + 근거 + 사람 승인"을 원칙으로 합니다.</div>
 </body>
 </html>

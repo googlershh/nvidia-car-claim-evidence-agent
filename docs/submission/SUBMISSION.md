@@ -31,8 +31,9 @@
 - OpenShell — 샌드박스 런타임, 네트워크 정책(기본 차단, 목적지별 허용), 자격증명 분리
 - Video Search and Summarization(VSS) Blueprint — 영상 저장(VST), VSS Agent(NeMo Agent Toolkit 기반), VSS 스킬(vss-ask-video 등)
 - NIM — Cosmos3 Nano Reasoner(영상 이해, GPU 자체 서빙)
-- build.nvidia.com NIM API — Nemotron 3 Super(에이전트 계획·도구 호출), Nemotron 3.5 Lightning(VSS 에이전트), Nemotron 3 Ultra(한국어 문서 작성), Nemotron 3 Nano Omni(영상·사진), DeepSeek-V4.1-Flash(프레임 기반 판정 비교)
-- Brev (RTX A6000 48GB) 개발 환경, 본선 DGX Spark
+- Nemotron 3 Super(에이전트 계획·도구 호출), Nemotron 3.5 Lightning(VSS 에이전트의 LLM) — build.nvidia.com 무료 API가 과부하(503)로 자주 막혀 OpenRouter 유료 경로로 호출
+- DeepSeek-V4.1-Flash(프레임 기반 사고유형 판정 비교, build.nvidia.com·OpenRouter), Nemotron 3 Nano Omni(초기 영상 판정 시험)
+- Brev (RTX A6000 48GB) — VSS와 NemoClaw를 한 GPU 인스턴스에서 실행
 
 **그 밖의 스택**
 - Python 3 (표준 라이브러리 중심), ffmpeg, Docker / Docker Compose

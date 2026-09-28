@@ -35,8 +35,8 @@ NVIDIA Agentic AI Hackathon, Creative Use-case 트랙 출품작.
 | **NemoClaw** (OpenClaw 하네스) | 에이전트 실행. 계획·도구 호출 모델은 Nemotron 3 Super |
 | **OpenShell** | 샌드박스. 네트워크 기본 차단과 목적지별 허용, 자격증명은 샌드박스 밖 |
 | **VSS Blueprint** | 사고 영상 저장(VST)과 영상 질의응답. 영상 모델 Cosmos3 Nano Reasoner(NIM)를 GPU에서 직접 서빙, VSS Agent는 NeMo Agent Toolkit 기반 |
-| **NIM API** (build.nvidia.com) | Nemotron 3 Super / 3.5 Lightning / 3 Ultra(한국어 문서), Nemotron 3 Nano Omni, DeepSeek-V4.1-Flash(프레임 판정 비교) |
-| 실행 환경 | 개발: Brev RTX A6000 48GB 한 대에 VSS와 NemoClaw. 본선: DGX Spark |
+| **모델 API** (OpenRouter · build.nvidia.com) | Nemotron 3 Super(에이전트), Nemotron 3.5 Lightning(VSS 에이전트), DeepSeek-V4.1-Flash(프레임 판정 비교). 무료 API 과부하로 OpenRouter 경유 |
+| 실행 환경 | Brev RTX A6000 48GB 한 대에 VSS와 NemoClaw |
 
 ## 데이터와 검증
 
