@@ -7,7 +7,7 @@
 ## 2. 서비스 파일 (또는 배포 URL)
 
 - GitHub 저장소: https://github.com/googlershh/nvidia-car-claim-evidence-agent (공개)
-- 제출 파일: `docs/submission/NVIDIA 해커톤_종지_협의 근거 에이전트.pdf` (A4 4쪽 소개서: 문제·해결·실제 실행 사례, 아키텍처, NVIDIA 기술, 데이터와 검증, NVIDIA 스택 구성, 실제 화면. 원본 `report.html`)
+- 제출 파일: `docs/submission/NVIDIA 해커톤_종지_협의 근거 에이전트.pdf` (A4 3쪽 소개서: 문제·해결·실제 실행 사례, 아키텍처, NVIDIA 기술, 데이터와 검증, 실제 화면. 원본 `report.html`)
 
 ## 3. 해결하고자 했던 문제 (Problem Definition)
 
