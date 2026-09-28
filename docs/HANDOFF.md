@@ -432,6 +432,22 @@ VSS 스킬은 API가 아니라 **에이전트가 따르는 작업 절차서**다
 - 감사 `[3b]`: 진술 유형이 규칙(일치·수용 = 영상 도표·기본과실, 다름 = 말하는 쪽 과실이 더 낮은 다른 도표·역할)을 지키는지 원본 매핑에서 다시 계산해 확인.
 - 한계: 수정요소 이름은 PDF 원문을 줄 단위로 이어 붙여 띄어쓰기가 빠진 것이 있다(예: "문열림의 예측가능성존재"). 수정요소 근거 시각은 재조사 루프 전이라 비어 있다.
 
+**Brev 인스턴스 구성: VSS + NemoClaw (2026-09-28).** 절차와 스크립트는 `scripts/brev/README.md`.
+- 인스턴스: Brev `claim-agent-a6000`(MassedCompute RTX A6000 48GB, CPU 6, RAM 48GB, SSD 256GB, 시간당 $0.68, **정지 불가 → 쓰고 나면 삭제**, 크레딧이 다 떨어지면 Brev가 자동 삭제). 이 PC에서는 WSL의 Brev CLI(`~/.local/bin/brev`)와 `scripts/brev_sync.sh`(코드 + 실행 데이터 455개 파일, 약 780MB)로 다룬다. 인스턴스에서 oracle 92건을 돌려 이 PC와 지표·산출물이 같음을 확인했다.
+- API 키: 사용자가 인스턴스의 `~/.nvidia_keys`(권한 600)에 직접 저장. **build.nvidia.com 키가 NGC 레지스트리(`nvcr.io`) 로그인에도 통했다**(별도 NGC 키 불필요).
+- NemoClaw: 비대화식 설치(`scripts/brev/01_install_nemoclaw.sh`), 모델 Nemotron 3 Super(build.nvidia.com), OpenShell 0.0.116.
+  - 막힌 점 ①: ufw가 켜진 호스트라 샌드박스 컨테이너가 게이트웨이(172.18.0.1:8080)에 닿지 못해 온보딩 실패 → Docker 브리지 대역만 허용하는 ufw 규칙 추가(사용자 승인). 외부에서 열린 포트는 여전히 SSH(22)뿐이다.
+  - 막힌 점 ②: SSH 비로그인 세션에는 systemd 사용자 버스가 없어 OpenShell 게이트웨이가 임시(standalone) 방식으로 떴다 → `loginctl enable-linger` + `XDG_RUNTIME_DIR`.
+- VSS: base 프로필(`scripts/brev/02_deploy_vss.sh`). 영상 모델 **Cosmos3 Nano Reasoner(BF16)를 A6000에서 직접 서빙**(GPU 메모리 70%), VSS 에이전트의 LLM은 Nemotron 3.5 Lightning(build.nvidia.com), `-H OTHER`(A6000은 VSS 하드웨어 목록에 없음). 컨테이너 약 38GB, 20분 남짓.
+  - 막힌 점 ③: `LLM_ENDPOINT_URL=…/v1`이면 에이전트 설정이 `/v1`을 한 번 더 붙여 404 → `https://integrate.api.nvidia.com`.
+  - 막힌 점 ④: VST가 데이터셋 영상 코덱(mpeg4)을 거부 → H.264로 변환해 업로드(`scripts/brev/vss_ask_clip.sh`).
+  - **동작 확인(F016, 진로변경, 검수 라벨 = 자차 후행 직진 vs 상대 선행 진로변경)**: 92초에 "자차 직진, 회색 세단이 뒤에서 오다 왼쪽으로 차로 변경, 약 5초에 충돌". 방향은 라벨과 맞다. 충돌 시각은 DeepSeek 답(9.38초)과 다르고 사람 확인 전이다. 표본 1건이다.
+  - 포트: 컨테이너가 0.0.0.0에 포트를 열지만 제공사 방화벽으로 외부에서는 22만 닿는다(이 PC에서 7777·8000·30888·3000·6379 등 확인).
+- NemoClaw ↔ VSS 연결: VSS 저장소의 공식 가이드 `deploy/docker/scripts/deploy_nemoclaw.ipynb`를 IPython으로 셀 순서대로 실행(`scripts/brev/03_connect_nemoclaw_vss.py`, 모델 제공자 셀은 (c) build.nvidia.com만). 가이드가 NemoClaw를 v0.0.127로 고정하고 샌드박스 `demo`를 VSS 스킬 이미지로 새로 만든다. 보조 스크립트가 Python 3.11+를 요구해 `uv`로 3.12 가상환경을 만들었다.
+  - 샌드박스 온보딩의 마지막 점검("bounded CLI scope warm-up")이 세 번 모두 실패했지만 샌드박스는 Ready. 이후 단계만 따로 실행(`--after-onboard`)해 **VSS 정책 적용, `vss configure`, 웹훅 설정, 게이트웨이 재시작까지 성공**했다.
+  - 결과: `vss` 명령에서 agent·rt_vlm 연결 ok. **활성 스킬 vss-ask-video, vss-generate-video-report, vss-manage-alerts, vss-manage-video-io-storage**. search·summarize·analytics는 base 프로필에 해당 서비스가 없어 비활성, `vios`는 "needs vst"로 비활성.
+  - 남은 문제: 에이전트 대시보드 포워딩(가이드 3.5)이 "launch-readiness epoch could not be safely revalidated … secure OS runtime authority"로 실패. 대시보드 없이도 CLI(`nemoclaw demo connect`)로 에이전트를 쓸 수 있는지 다음에 확인한다. 처음 만든 샌드박스 `claim-agent`는 가이드의 업그레이드 백업 단계에서 멈춘 채 남아 있다(정리 대상).
+
 ### 7.4 이후 순서
 2차 다운로드: 597 VS 3개 장소(합계 8.5GB, 검증 세트라 "학습에 안 쓴 데이터로 평가" 주장 가능) → 3차: 581 `VS_damage`, `VS_damage_part`(5.6GB).
 
