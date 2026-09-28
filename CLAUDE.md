@@ -25,6 +25,8 @@ NVIDIA Agentic AI Hackathon(Creative Use-case 트랙) 출품작.
 1. ~~1차 확인 체크리스트~~ 완료 (HANDOFF 7.3).
 2. ~~라벨 파서~~ 완료: `aihub/` 패키지, `python scripts/build_interim.py`.
 3. ~~평가 세트, 합성 사고 건~~ 완료: `scripts/build_eval_fault.py`, `scripts/build_synth_cases.py` (HANDOFF 7.3).
-4. ~~end-to-end 파이프라인~~ 골격 완료: `docs/ARCHITECTURE.md`, `agent/`, `eval/run_eval.py`. 오프라인 `oracle` 백엔드로 150건 동작 확인. 다음은 결제 후 `nim` 백엔드 실측(소표본부터, 호출 전 비용 추정을 사용자에게 알리고 승인받을 것).
+4. ~~end-to-end 파이프라인~~ 골격 완료: `docs/ARCHITECTURE.md`, `agent/`, `eval/run_eval.py`. 오프라인 `oracle` 백엔드로 검수 통과 92건 동작 확인(청구 차량 A/B 역할 반영).
+5. ~~평가 영상 150건 전수 검수~~ 완료: `docs/LABEL_REVIEW.md`. 이후 평가·합성 건은 검수 통과 92건만 쓴다.
+6. 방향 전환 검토 중: 대물 담당자의 협의 근거 에이전트(`docs/DIRECTION.md`, `docs/SCOPE.md`, 근거 `docs/ROI_EVIDENCE.md`). 다음은 **영상 판정 관문 15건**(DIRECTION 5절). 영상 모델 가용성은 HANDOFF 5.4, VSS 스킬은 5.2.1. 유료 호출은 비용 추정을 알리고 승인받을 것.
 
-재생성 순서: `download_aihub.py --stage 1 meta 2 3` → `build_interim.py` → `build_eval_fault.py` → `build_synth_cases.py` → `extract_media.py` → `audit_eval_sets.py`.
+재생성 순서: `download_aihub.py --stage 1 meta 2 3` → `build_interim.py` → `build_eval_fault.py` → `build_eval_reviewed.py`(검수 매니페스트 `data/manifests/label_review.csv` 적용, 92건) → `build_synth_cases.py` → `extract_media.py` → `audit_eval_sets.py`.

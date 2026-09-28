@@ -36,6 +36,8 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 
 ## 3. 문제 정의와 범위
 
+> 2026-09-28: 방향 전환 검토 중이다(대물 담당자의 **협의 근거 에이전트**, 과실 = 상대 보험사, 수리비 = 정비업체). 새 문제 정의은 `docs/DIRECTION.md` 1~4절, 업무별 범위는 `docs/SCOPE.md`. 영상 판정 관문(DIRECTION 5절) 결과로 주인공이 확정되면 이 절을 고쳐 쓴다.
+
 **한 줄 정의:** 손해보험사 대물보상팀이 차대차 사고 1건을 받았을 때, 과실비율 초안과 수리비 인정액을 근거와 함께 만들고 이상 건을 골라내는 에이전트.
 
 - 포함: 차대차 대물(차량 수리비) 1차 사정. 사고 장소는 **직선 도로, 신호 있는 사거리, T자형 교차로** (교통사고 영상 데이터의 약 60%).
@@ -121,7 +123,7 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 
 | 단계 | 모델(API ID) | 스킬 / 블루프린트 | 비고 |
 |---|---|---|---|
-| A. 영상 분석 | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(주), `nvidia/cosmos-reason2-8b`(교차검증) | `vss-ask-video`, `vss-summarize-video`, `vss-generate-video-report`(VSS 배포 필요), `tao-run-deft-cr-its-mining`(교통 카메라 영상에 Cosmos Reason을 쓰는 NVIDIA 사례) | Omni 영어 전용 → 프롬프트·JSON 출력 영어 |
+| A. 영상 분석 | `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning`(주), `nvidia/cosmos-reason2-8b`(교차검증) | `vss-ask-video`, `vss-summarize-video`, `vss-generate-video-report` — **모두 VSS 블루프린트 서버 배포가 전제**(아래 5.2.1) | Omni 영어 전용 → 프롬프트·JSON 출력 영어 |
 | A. 과실 추론·플래너·사정서 | `nvidia/nemotron-3-ultra-550b-a55b`(한국어) / 서브에이전트 `nemotron-3.5-lightning-30b-a3b` | — | 한국어 출력은 Ultra만 |
 | A. 인정기준 RAG | `nvidia/nemotron-3-embed-1b`(한국어) | `nemo-retriever`(로컬 LanceDB), `nemo-retriever-mcp`, `rag-blueprint`, `rag-eval`(검색 정확도), `nemotron-retrieval-recipes` | 리랭커 API 없음 → 임베딩 top-k로 시작 |
 | B. 파손 사진 | Omni(이미지), `meta/llama-3.2-90b-vision-instruct` | — | |
@@ -132,6 +134,21 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 | 데이터 | — | `data-designer` | 없는 "당사자 진술"을 합성(영상과 일치/불일치) → 4절 "진술 대조" 단계 재료 |
 | 스킬 거버넌스 | — | `skill-card-generator`, `nvidia-skill-finder` | 우리 도구를 SKILL.md 스킬로 만들고 스킬 카드 작성 → "Skill API 활용"·Skill Spector 스토리 |
 | 실행 환경 | — | Brev(L40S 31종 등), DGX Spark 플레이북 | 평가 배치는 Brev L40S 가능 |
+
+#### 5.2.1 VSS 스킬 원문 확인 (2026-09-28, `NVIDIA/skills` 저장소의 SKILL.md)
+VSS 스킬은 API가 아니라 **에이전트가 따르는 작업 절차서**다. 실제 처리는 VSS 블루프린트 서버(docker compose)가 한다. `base` 프로필 = VSS 에이전트(8000), 영상 저장 VST(30888), 기본 VLM `cosmos3-nano-reasoner`, 기본 LLM `nemotron-nano-9b-v2`. 대체 VLM은 `cosmos-reason2-8b`(약 21GB), `cosmos-reason1-7b`, `Qwen3-VL-8B`.
+
+| 스킬 | 하는 일 | 절차 | 우리 쓰임새 |
+|---|---|---|---|
+| `vss-ask-video` | 클립 하나에 대한 임의 시각 질문 | 에이전트 확인 → VST에 mp4 업로드(센서 등록) → `POST /generate` "video_understanding 도구로 `<센서>`에 대해 `<질문>`" → 응답의 `<agent-think>` 제거 | 과실 A단계의 **수정요소 증거 재탐색**("충돌 직전 방향지시등?", "몇 초에 차로를 넘었나?") |
+| `vss-summarize-video` | 클립 요약 + 타임스탬프 사건 | `lvs` 프로필의 `/v1/summarize`(시나리오·사건 지정). 없으면 VLM 고정 프롬프트로 대체(품질 낮음) | 사고 경위 요약 |
+| `vss-generate-video-report` | 양식 보고서 | Mode A: VST 클립 URL → VLM `chat/completions` → `# Video Analysis Report`. Mode B: 알림·사건 범위 보고서(CCTV 관제용) | Mode A만. 협의 근거 묶음의 영상 분석 첨부 |
+
+- 이 PC(Windows, RTX 2060 6GB): 불가. 리눅스 + Docker + NVIDIA 런타임 필요.
+- 호스팅 API 연결: 사실상 불가. 기본 VLM인 Cosmos 계열이 이 계정에서 404이고, 원격 VLM은 로컬 VST 클립 URL을 가져올 수 없다고 스킬 원문에 적혀 있다.
+- **DGX Spark: 가능**(스킬의 `edge.md`에 Spark 전용 구성: Cosmos3 nano + Nemotron nano 9B NVFP4). Brev L40S(48GB)도 cosmos-reason2-8b + nemotron-3-nano(약 29GB)로 가능하나 유료.
+- 계획: 해커톤 전에는 지금의 프레임 + 후보표 호출을 **우리 SKILL.md 스킬**(VSS 스킬과 같은 형식)로 감싸고, 당일 DGX Spark에서 VSS를 띄우면 그 스킬의 호출 대상만 `vss-ask-video`로 바꾼다. 영상이 사내 장비 밖으로 나가지 않는 구성이라 OpenShell 시연과 이어진다.
+- `tao-run-deft-cr-its-mining`은 **제외**: 교통 카메라용 Cosmos Reason을 재학습하는 DEFT 루프로, "TAO 학습 제외" 결정과 충돌한다. 참고 사례로만 둔다.
 
 쓰지 않을 것: TAO 학습·DOCA·Jetson·Omniverse·BioNeMo·음성 계열 스킬 대부분, 이미지 생성 모델.
 
@@ -147,6 +164,59 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
   - 3차(같은 스크립트, **후보표를 영어로 번역** `data/reference/accident_codes_en.csv`, 503 재시도): 12건 중 F003 2건만 응답. **F003 추론 off + 영어 표 → top-1 정답(코드 2)**, top-2·3도 추돌 유형(0, 1), 근거 "A 정차, B가 5.62초에 추돌". 한국어 표로는 13을 골랐으므로 오답 원인은 한국어 후보표 해석이었을 가능성이 크다(표본 1건). 추론 on은 4,096 토큰을 추론에 다 써서 JSON을 못 냈고 80초 이상 걸림 → **이 작업은 추론 off가 기본**. 나머지 4건은 503 반복과 300초 대기 초과. 호출 13/15, 기록 토큰 14,062(대기 초과 2건은 서버에서 처리됐다면 최대 약 1.8만 추가 가능).
   - **데모 리스크: 무료 공용 엔드포인트는 붐비면 응답하지 않는다.** 해커톤 당일 데모는 DGX Spark 자체 서빙이나 주최측 제공 엔드포인트로 해야 한다.
 - 결론: 전송·JSON·한국어 프롬프트는 작동. **사고유형(진행 방향) 판정은 3건 모두 틀림** → 11절 리스크가 현실화. 다음 시험 후보: ① 충돌 전후 프레임을 이미지 여러 장으로 직접 보내 샘플링 통제 ② 추론 on/off 비교, `<unk>` 재현 여부 ③ 코드표 후보(장소별 사고유형 설명)를 프롬프트에 넣어 분류형 질문으로 바꾸기.
+
+### 5.4 영상 이해 모델 재확인 (2026-09-28, `/v1/models` 82개 + 모델 카드·API 문서, 이후 호출 시험)
+| API ID | 영상 입력 | 근거 | 메모 |
+|---|---|---|---|
+| `nvidia/nemotron-3-nano-omni-30b-a3b-reasoning` | O (mp4 base64, 최대 2분) | 호출 시험 완료(5.3) | 영어 전용. 무료 워커 혼잡 시 503 |
+| `google/gemma-4-31b-it` | O (MP4/WebM, 1fps로 최대 60초) | 모델 카드 | 다국어(한국어 명시 여부 미확인). 시각 토큰 예산 70~1120 선택. 호스팅 API의 영상 전달 형식 미확인 |
+| `moonshotai/kimi-k2.6` | 모델은 O (MoonViT로 영상 프레임 인코딩) | NVIDIA API 문서, Moonshot 문서 | NVIDIA 호스팅 API의 영상 형식·한도 미확인 |
+| `nvidia/vila` | O (단일 영상, 프레임 최대 16) | NVIDIA API 문서 | **다른 엔드포인트** `ai.api.nvidia.com/v1/vlm/nvidia/vila`. base64 인라인은 약 200KB까지, 초과 시 NVCF asset 업로드 |
+| `nvidia/cosmos-reason2-8b` | O | 목록에 있음 | 2026-09-27 호출 3회 모두 404 "Function not found for account". 웹 페이지는 `cosmos3-nano-reasoner`로 넘어가는데, 이 모델은 API 목록에 없음 |
+| `z-ai/glm-5.3-flash` | X (이미지 8장까지) | NVIDIA API 문서 | 원 모델은 영상 지원이지만 NVIDIA 호스팅은 이미지만 |
+| `moonshotai/kimi-k3` | X (텍스트·이미지) | 모델 카드 | |
+| `meta/llama-3.2-11b/90b-vision-instruct`, `microsoft/phi-3-vision-128k-instruct` | X (이미지) | 기존 카탈로그 | 프레임을 이미지로 보내는 방식은 가능 |
+| `nvidia/ai-synthetic-video-detector` | O | 기존 카탈로그 | AI 생성 영상 탐지 전용(이해 X) |
+
+**호출 시험 결과 (2026-09-28, `scripts/try_video_candidates.py`, F003 1개, 호출 7회, 기록 토큰 2,012)**
+| 모델 | 결과 |
+|---|---|
+| Omni(추론 off) | **성공**, 37초(503 한 번 후 재시도). 답은 또 오답: "자차 정지, 앞차가 후진해 충돌"(정답: 앞차 주정차, 자차 후행 추돌). 5.3절 3차처럼 프레임 + 영어 후보표 방식에서는 같은 영상의 top-1을 맞혔다 |
+| `cosmos3-nano-reasoner` | 404 "page not found" → 호스팅 API에 없음 |
+| `cosmos-reason2-8b` | 404 "Function not found for account"(어제와 같음) |
+| `gemma-4-31b-it` | 400 "At most 0 video(s) may be provided" → **호스팅 엔드포인트는 영상 입력이 꺼져 있음**. 이미지는 별도 확인 필요 |
+| `kimi-k2.6` | 404 "Function not found for account" |
+| `nvidia/vila` | 404 "Function not found for account" |
+
+- `cosmos3-nano-reasoner` 웹 페이지의 API 안내는 `integrate.api.nvidia.com/v1`와 **`nvidia-cosmos-reason2-8b` 문서**를 가리킨다. 즉 웹 체험판 뒤의 호스팅 API는 cosmos-reason2-8b 함수로 보이며, 이 계정에서는 404다. 웹 체험판(Experience 탭, mp4/jpg/png 업로드)은 이용약관 동의, 로그인, hCaptcha가 필요해 사람이 직접 해야 한다.
+
+- **Cosmos3 웹 체험판 1건 (2026-09-28, 사용자가 직접 실행, 추론 on, F003 720p·4fps):**
+  - 서술: "자차가 급정거한 앞차를 뒤에서 추돌" → 과실 방향(자차 100%)은 라벨과 같다.
+  - JSON: 자차 `stopped`, 충돌 부위 자차 `rear`·상대 `front` → 자기 서술과도 모순되고 라벨과도 반대다.
+  - 영상에서 확인되지 않는 "보행자가 다시 건너서 급정거"를 지어냈다.
+- **F003 라벨은 AI Hub 원본 라벨 오류로 확정**(2026-09-28 사용자 영상 확인: 앞차 후진). 원본 JSON(`traffic_accident_type` 2, A 0 / B 100, 1인칭)과 설명서 코드표·"1인칭은 본인을 B로 간주" 규칙을 직접 대조했고, 우리 파서·평가 세트는 원본을 그대로 옮겼다. 근거(2fps 20프레임, 1920×1080 원본의 좌우 여백을 잘라 봄):
+  - 0~5초: 앞차 하단 좌우 등이 **흰색**(후진등으로 보임). 배경(주차 요금소 부스, 현수막, 건물 창, 가로등)은 전 구간에서 위치가 그대로다 → **자차는 정지**해 있다.
+  - 5.0~6.0초: 앞차가 급격히 커진다(차 폭 약 160px → 210px) → **앞차가 후진해 자차와 충돌**.
+  - 6초 이후: 앞차 하단 등이 **빨간색**(후진등이 꺼지고 제동등·미등)으로 바뀌고 거리가 유지된다.
+  - 보행자는 오른쪽 건물 입구 쪽 먼 배경에 1명 보인다. 앞차 앞을 건너는 장면은 확인되지 않는다.
+  - 라벨은 "앞차 주정차, 자차 후행 추돌(0:100)"이다. 실제로는 **Omni의 두 번의 답("자차 정지, 앞차 후진")이 맞고**, Cosmos3의 서술("자차가 따라가다 급정거한 앞차를 추돌")은 틀렸다. 5.3절 3차에서 Omni가 "코드 2를 맞혔다"고 한 것은 틀린 라벨과 일치한 것이다.
+  - 원인(확인): 설명서 코드표에 **"직선도로에서 앞차가 후진해 정지한 뒤차와 충돌"하는 차대차 코드가 없다**("후진"은 127 주차장 후진 출차, 173·174 보행자뿐). 작업자는 저작도구 메뉴에서 코드를 고르고 과실은 코드의 기본과실이 자동으로 들어가므로, 겉모습이 가장 비슷한 2번(주정차 vs 후행 추돌)을 고르면 과실이 뒤집힌다. 설명서에는 검수 방법·라벨 정확도 수치가 없다. 영상에 `www.Bandicam.co.kr` 워터마크가 있어 원본이 아닌 화면 녹화본으로 보인다(가설: 맥락 손실).
+  - 설계 반영: 에이전트에게 "해당 도표 없음 → 사람 이관" 선택지를 둔다. 실제 인정기준 원문에 후진 사고 도표가 있는지는 원문 확보 후 확인한다.
+  - 영향: 평가 세트에도 라벨 오류가 섞여 있을 수 있다. → **150건 전수 검수 완료(2026-09-28, `docs/LABEL_REVIEW.md`)**: 일치 75, 역할반전(자차가 A일 때만 맞음) 20, 불일치 10, 애매 45, 평가 세트 안 중복 4쌍. **이후 평가·합성 사고 건은 검수 통과 92건만 쓴다**(`scripts/build_eval_reviewed.py`). `audit_eval_sets.py`는 라벨과 코드표의 형식 일치만 검사하고 영상 내용은 보지 않는다. 판정 시험 전에 표본 영상을 사람이 확인한다.
+
+→ **이 계정의 호스팅 API에서 영상을 직접 받는 모델은 Omni뿐이다.** Cosmos를 쓰려면 NIM 직접 실행(Brev GPU 또는 본선 DGX Spark)이 필요하다.
+
+- 이미지만 받는 모델도 **프레임 여러 장을 이미지로 보내는 방식**(5.3의 2·3차 시험)으로 쓸 수 있다.
+
+**프레임 방식 시험: `deepseek-ai/deepseek-v4.1-flash` (2026-09-28, `scripts/try_frame_models.py`, 무료 API, 0원)**
+- 입력: nim 백엔드와 같은 프롬프트(`agent/backends/nim.py`의 `video_prompt`): 640px 프레임 8장 + 영어 후보표 + "자차가 A인지 B인지" 질문. 채점은 검수 통과 세트(`eval_fault_reviewed.csv`)의 사고유형·자차 역할·자차 과실.
+- 대상: F016(코드 11 진로변경, 자차 A, 자차 과실 30), F049(코드 16, B, 20), F053(코드 87, B, 10).
+- 1차(`max_tokens` 4096): 3건 모두 `finish_reason=length`, `reasoning_tokens` 4096, 본문 빈 문자열. 추론을 끌 수 있는 옵션 없이 호출해 **추론이 출력 한도를 다 썼다**. 건당 90~118초.
+- 2차(`max_tokens` 16000, 클라이언트 대기 900초):
+  - **F016: 전부 정답.** top-1 코드 11, 자차 역할 A(검수에서 역할반전으로 분류한 건), 자차 과실 30. 근거: "자차가 약 40km/h로 직진, 오른쪽 차로 은색 세단이 자차 차로로 진입, 9.38초 측면 충돌". 205초, 출력 약 8,200 토큰.
+  - F049, F053: **HTTP 504**(302초). 호스팅 게이트웨이가 약 300초에서 끊는다. 생성이 300초를 넘으면 받을 수 없다. 재시도는 사용자가 중단.
+- 해석: 형식과 역할 판단은 가능하다는 신호지만 **표본 1건이라 정확도는 모른다**. 추론이 길어 지연(3~5분)과 504가 데모 리스크다. 다음 시험은 스트리밍 응답(504 회피) 또는 출력 한도 약 8천으로 판정 관문 15건(DIRECTION 5절).
+- 호출 가능 여부와 실제 영상 전달 형식은 **실제 호출로만 확정**된다(cosmos-reason2의 전례).
 
 - **설계 영향**: 영상 모델(Omni)은 영어 전용이므로 영상 분석 프롬프트와 출력(JSON)은 영어로 하고, 한국어가 필요한 단계(견적 항목 해석, 인정기준 검색, 사정서 작성)는 Ultra + 한국어 임베딩이 맡는다. Omni의 한국어 이해 품질은 11절 리스크대로 샘플로 먼저 검증.
 
@@ -298,7 +368,9 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
   - 장소별 50건, 과실비율 값을 번갈아 뽑고 같은 비율 안에서는 덜 뽑힌 사고유형 우선. 직선 17유형, 신호 사거리 32유형, T자 10유형. **T자형은 VL에 0·80·100 비율이 거의 없어 10~40에 몰린다**(데이터 분포 한계).
 - 충돌 부위 매핑표: `data/reference/collision_areas.csv`(직접 작성, git). 범위 내 차대차 84개 코드 → A·B 각각 가능한 방향(front/rear/left/right)과 신뢰도. high 4(추돌 0·1·2, 역주행 5), medium 30, low 50(교차로 측면 진입 등 누가 들이받았는지 영상 없이 모르는 경우 → front;left;right).
 - 부위 → 방향: `aihub/parts.py`. 파손 라벨 영문 부위 46종 전부, 견적서 한글 항목(교환·판금·수리·탈착 행)의 93%. 모서리 부위는 두 방향(앞휀다(좌) = front+left). "후론트" = front, "(뒤,우)" = 뒷도어 우측 등 정비업계 표기 반영.
-- 합성 사고 건: `python scripts/build_synth_cases.py` → `data/manifests/synth_cases.csv`(id만, git), `data/interim/synth_cases.jsonl`(정답 포함). 150건 = 정상 90 / 과잉 견적 30 / 모순 30. 기대 라우팅: approve 81, adjust 39, siu 30. 이미지 439장.
+- 합성 사고 건: `python scripts/build_synth_cases.py` → `data/manifests/synth_cases.csv`(id만, git), `data/interim/synth_cases.jsonl`(정답 포함). 처음에는 150건 = 정상 90 / 과잉 견적 30 / 모순 30(기대 라우팅 approve 81, adjust 39, siu 30, 이미지 439장)이었다.
+  - **2026-09-28 갱신: 검수 통과 영상 92건만 쓴다**(`build_eval_reviewed.py` → `eval_fault_reviewed.csv`, 5.4·`docs/LABEL_REVIEW.md`). 92건 = 정상 56 / 과잉 18 / 모순 18, 기대 라우팅 approve 49, adjust 25, siu 18, 이미지 293장. **청구 차량 = 촬영 차량이며 B 73건, A 19건**(역할반전). 충돌 방향은 `collision_areas.csv`에서 청구 차량 역할(A/B)의 칸을 쓰고, 케이스에 `claimant`, `claimant_impact_directions`가 들어간다. 아래 "B"는 이 청구 차량으로 읽는다.
+  - 파이프라인도 역할을 따른다: 지급 예상액 = 인정액 × 1.1 × **상대(우리 피보험자) 과실**, 이상 징후는 청구 차량 충돌 방향으로 판단. 평가 지표는 `claimant_role_accuracy`, `claimant_fault_exact`, `claimant_fault_within_10pt`. oracle 92건 라우팅 0.924(`docs/ARCHITECTURE.md`).
   - 사고 1건 = 평가 영상 1개(B가 청구) + 쏘카 사고 1건(VL_damage 사진 + 견적서). 쏘카만 쓰는 이유: 손해사정 후 금액이 정답이다.
   - 견적서 필터: ① 조정 전 금액이 빈칸인 견적서(쏘카의 7%) 제외 ② 헤더 청구액>지급액 여부와 항목 조정 여부가 다른 견적서 제외(2,412건은 항목은 같은데 헤더만 감액 → 단가 수준 조정으로 추정, 정답 모호) ③ **견적 수리 항목의 방향이 모두 사진 방향 안에 드는 사고만**(데이터셋 사진이 수리 부위를 다 찍지 않은 경우가 많아, 그대로 두면 "사진에 없는 부위" 정답이 오염된다). 후보 6,159 → 5,491 → 3,753건.
   - 정상: B 충돌 방향과 사진 방향이 `consistent`. 과잉: 정상 + 같은 차종 다른 견적서의 교환 행 1~2개 주입(사진 방향에 없고 충돌상 가능한 방향, 공임 3만 원 이상. 쏘카 견적은 부품가를 별도 행에 적어 교환 행은 대부분 공임만 있다). 모순: 사진 방향이 B 충돌 방향과 전혀 겹치지 않음. high/medium 코드만 사용(high 9, medium 21).
@@ -319,12 +391,16 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 ### 7.4 이후 순서
 2차 다운로드: 597 VS 3개 장소(합계 8.5GB, 검증 세트라 "학습에 안 쓴 데이터로 평가" 주장 가능) → 3차: 581 `VS_damage`, `VS_damage_part`(5.6GB).
 
-평가 세트:
-- 과실 판단: 세 장소에서 블랙박스(1인칭) 위주로 유형별 약 50건, 총 150건. 과실비율(0:100, 20:80, 50:50 …)이 고르게.
-- 합성 사고 건 100~200개: 정상 / 과잉 견적(사진에 없는 부위 추가 등) / 모순(다른 부위 사진) 비율 지정, 정답 저장.
-- 모사 데이터 800건 → 충돌유형×충돌부위 빈도표.
+평가 세트 (모두 완료, 7.3):
+- ~~과실 판단 150건~~ → 영상 전수 검수 후 **92건**(직선 33, 신호 사거리 32, T자 27).
+- ~~합성 사고 건~~ → 92건(정상 56 / 과잉 18 / 모순 18).
+- 모사 데이터 800건 → 충돌유형×충돌부위 빈도표(`sim_meta.csv`, 참조표 작성은 미완).
+
+다음 결정: 영상 판정 관문 15건(검수 통과 92건에서 추출, `docs/DIRECTION.md` 5절), 인정기준 원문 확보, NemoClaw/OpenShell 환경, 에이전트 구조를 계획 루프로 전환.
 
 ## 8. 평가 지표
+
+> 2026-09-28: 방향 전환 검토 중이다(대물 담당자의 **협의 근거 에이전트**, 과실 = 상대 보험사, 수리비 = 정비업체). 새 평가 설계은 `docs/DIRECTION.md` 8절, 업무별 범위는 `docs/SCOPE.md`. 영상 판정 관문(DIRECTION 5절) 결과로 주인공이 확정되면 이 절을 고쳐 쓴다.
 
 | 지표 | 방법 |
 |---|---|
@@ -337,6 +413,8 @@ claude.ai 대화 세션(2026-09-27)의 내용을 Claude Code로 넘기기 위해
 | GPU 수요 | 건당 토큰, 지연 (NeMo Agent Toolkit 프로파일링) |
 
 ## 9. 3분 데모 시나리오
+
+> 2026-09-28: 방향 전환 검토 중이다(대물 담당자의 **협의 근거 에이전트**, 과실 = 상대 보험사, 수리비 = 정비업체). 새 시나리오은 `docs/DIRECTION.md` 4절, 업무별 범위는 `docs/SCOPE.md`. 영상 판정 관문(DIRECTION 5절) 결과로 주인공이 확정되면 이 절을 고쳐 쓴다.
 1. 정상 건(신호 교차로): 30초 안에 과실비율 + 근거 도표 + 인정 수리비 사정서 초안.
 2. 과잉 견적 건: 사진은 앞범퍼 스크래치뿐인데 견적에 전조등 교환 → 조정 요청서.
 3. 모순 건: 영상상 후방 추돌인데 전면 파손 청구 → SIU 이관 메모.
