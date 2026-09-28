@@ -1,0 +1,9 @@
+{
+  "description": "User-provided demo clip and extracted frames, authorized for inclusion in the sharing demo.",
+  "files": {
+    "demo.mp4": "c9517d0a14d6f602c97c2793c481fe1b533c9cb86d04470879efb03826202467",
+    "frame-01.jpg": "78f572f213ee77d268538b0d11b64514c9ba4096c630b2a17f51bab0fe83d6a3",
+    "frame-05.jpg": "d98c36558801cf08cb029e1aee3428709bef5033497317d90785e636b2c80aaa",
+    "frame-09.jpg": "cb0b644d0fcabb5f359a52462e7bd2a850dc057a10e4c8f614dbf7baef8336b0"
+  }
+}

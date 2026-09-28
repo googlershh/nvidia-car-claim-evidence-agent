@@ -1,0 +1,13 @@
+<!doctype html>
+<html lang="ko">
+<head><meta charset="UTF-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>사건노트 DOCX 편집기</title></head>
+<body>
+<main id="editor-shell">
+ <div class="filebar"><span class="file-icon">W</span><div class="filename"><strong id="filename">협의 문서.docx</strong><span id="status" role="status">문서를 여는 중…</span></div><button id="open-file" title="DOCX 파일 열기" disabled>열기</button><button id="download" class="primary" disabled>DOCX 내려받기</button></div>
+ <div id="toolbar"></div>
+ <div id="editor"></div>
+ <div class="statusbar"><span>브라우저에서 편집 · 다운로드로 보관</span><div><button id="fit" disabled>폭 맞춤</button><button id="actual" disabled>100%</button><button id="expand" disabled>크게 보기</button></div></div>
+ <input id="file-input" type="file" accept=".docx,application/vnd.openxmlformats-officedocument.wordprocessingml.document" hidden>
+</main>
+<script type="module" src="/src/main.js"></script>
+</body></html>
