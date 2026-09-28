@@ -1,6 +1,6 @@
 {
   "$schema": "node_modules/wrangler/config-schema.json",
-  "name": "case-note-demo",
+  "name": "nvidia-car-claim-evidence-agent",
   "compatibility_date": "2026-09-28",
   "assets": {
     "directory": "./dist",
