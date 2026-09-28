@@ -1,6 +1,6 @@
 # Brev 인스턴스 구성 (VSS + NemoClaw)
 
-GPU 인스턴스 한 대에 VSS Blueprint와 NemoClaw를 함께 올리는 절차입니다. 본선 DGX Spark에서도 같은 순서를 씁니다.
+GPU 인스턴스 한 대에 VSS Blueprint와 NemoClaw를 함께 올리는 절차입니다.
 2026-09-28 Brev MassedCompute RTX A6000 48GB(CPU 6, RAM 48GB, SSD 256GB, 시간당 $0.68, **정지 불가 → 쓰고 나면 삭제**)에서 확인했습니다.
 아래 "막힌 점"은 그날 실제로 실패한 것들이고, 스크립트가 모두 미리 처리합니다. 이 순서로 샌드박스를 새로 만들어 **연결 가이드 전 셀 통과(대시보드 포함)**를 확인했습니다.
 

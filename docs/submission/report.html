@@ -126,6 +126,13 @@
   .fade { color: var(--faint); font-size: 6.8pt; margin-top: 1.4mm; }
 
   /* page 2 */
+  @page land { size: A4 landscape; margin: 0; }
+  .page.land { page: land; width: 297mm; height: 210mm; }
+  .screen { border: 0.3mm solid #d5dbe1; border-radius: 2mm; overflow: hidden; box-shadow: 0 0.8mm 3mm rgba(15,20,25,0.10); }
+  .screen .bar3 { height: 5.5mm; background: var(--soft2); border-bottom: 0.25mm solid var(--line); display: flex; align-items: center; gap: 1.3mm; padding: 0 3mm; }
+  .screen .bar3 i { width: 2mm; height: 2mm; border-radius: 50%; background: #c9d0d6; }
+  .screen .bar3 span { font-size: 7pt; color: var(--faint); margin-left: 2mm; }
+  .screen img { width: 100%; display: block; }
   .arch img { width: 100%; display: block; margin: 0 auto; border-radius: 2mm; }
   table.tech { width: 100%; border-collapse: collapse; font-size: 7.7pt; }
   .tech th { text-align: left; font-size: 7pt; font-weight: 700; color: var(--sub); padding: 1.3mm 2mm; border-bottom: 0.4mm solid var(--ink); }
@@ -265,7 +272,7 @@
       </div>
     </div>
   </div>
-  <div class="foot"><span>협의 근거 에이전트 · 자동차보험 교통사고 보상 · 팀 종지</span><span>1 / 2</span></div>
+  <div class="foot"><span>협의 근거 에이전트 · 자동차보험 교통사고 보상 · 팀 종지</span><span>1 / 3</span></div>
 </section>
 
 <!-- ============ PAGE 2 ============ -->
@@ -329,7 +336,19 @@
     </div>
 
   </div>
-  <div class="foot"><span>통계: 보험연구원 「자동차보험 민원·소송 현황과 제도개선 방향」(2026) 인용 보도, 과실비율분쟁심의위원회 · 인정기준: 손해보험협회 제10차 개정(2023)</span><span>2 / 2</span></div>
+  <div class="foot"><span>통계: 보험연구원 「자동차보험 민원·소송 현황과 제도개선 방향」(2026) 인용 보도, 과실비율분쟁심의위원회 · 인정기준: 손해보험협회 제10차 개정(2023)</span><span>2 / 3</span></div>
+</section>
+
+<!-- ============ PAGE 3 (landscape) ============ -->
+<section class="page land">
+  <div class="wrap" style="padding-top: 9mm;">
+    <div class="sec" style="margin-top:0">
+      <div class="sec-h"><span class="n">07</span><h2>실제 화면 — 영상 근거 확인에서 협의 요청서까지</h2><span class="rule"></span></div>
+      <figure class="screen"><div class="bar3"><i></i><i></i><i></i><span>사건노트 · 강남대로 차로 변경 사고</span></div><img src="../assets/ui_screen.png" alt="사건 상세 실제 화면"></figure>
+      <p class="caption"><b>그림</b> — 왼쪽은 사건 자료(영상·사진·진술서·견적서), 가운데는 블랙박스 영상을 근거로 살펴보고 질문하는 영역, 오른쪽은 협의 문서 「사실관계 확인 및 협의 요청서」(DOCX) 초안입니다. 담당자가 화면에서 바로 고치고 내려받습니다.</p>
+    </div>
+  </div>
+  <div class="foot"><span>협의 근거 에이전트 · 자동차보험 교통사고 보상 · 팀 종지</span><span>3 / 3</span></div>
 </section>
 </body>
 </html>
