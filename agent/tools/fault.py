@@ -8,6 +8,8 @@ follows the 9th edition; 4 in-scope codes changed value and 1 has no clear chart
 from __future__ import annotations
 
 import csv
+import json
+import re
 from functools import lru_cache
 from pathlib import Path
 
@@ -18,6 +20,7 @@ CODES_KO = ROOT / "data" / "interim" / "accident_codes.csv"
 CODES_EN = ROOT / "data" / "reference" / "accident_codes_en.csv"
 COLLISION = ROOT / "data" / "reference" / "collision_areas.csv"
 CHART_MAP = ROOT / "data" / "reference" / "code_to_chart.csv"
+CHARTS = ROOT / "data" / "interim" / "knia" / "charts.json"
 IN_SCOPE_PLACES = ("직선도로", "사거리교차로(신호등있음)", "T자형교차로")
 
 
@@ -48,6 +51,39 @@ def collision_areas() -> dict[int, dict]:
 def chart_map() -> dict[int, dict]:
     """Code -> chart number, variant, current base fault (A/B in the code's orientation), mapping status."""
     return {int(r["code"]): r for r in _read(CHART_MAP)}
+
+
+@lru_cache(maxsize=1)
+def charts() -> dict[str, dict]:
+    """Every car-vs-car chart of the fault standard (scripts/build_chart_map.py)."""
+    if not CHARTS.exists():
+        raise FileNotFoundError(f"{CHARTS} missing; run scripts/download_knia.py and scripts/build_chart_map.py")
+    return json.loads(CHARTS.read_text(encoding="utf-8"))
+
+
+def chart_label(code: int) -> str:
+    ch = chart_map()[code]
+    return ch["chart"] + (f"({ch['variant']})" if ch["variant"] else "")
+
+
+def modifier_value(value: str) -> int | None:
+    """'+10' -> 10, '-20' / '(-)10' -> -20 / -10, '+5~10' -> 5, '비적용' -> None."""
+    m = re.match(r"\(?([+\-])\)?\s?(\d+)", value)
+    return (1 if m.group(1) == "+" else -1) * int(m.group(2)) if m else None
+
+
+def code_modifiers(code: int) -> list[tuple[str, str, int]]:
+    """Modifiers of the code's chart as (code role A/B, name, value), minus the ones already in the base fault."""
+    ch = chart_map()[code]
+    applied = {a.split(" ", 1)[1].rsplit(" ", 1)[0] for a in ch["applied_modifiers"].split("; ") if a}
+    out = []
+    for m in charts()[ch["chart"]]["modifiers"]:
+        v = modifier_value(m["value"])
+        if v is None or m["name"] in applied:
+            continue
+        role = m["party"] if ch["swap_ab"] == "0" else {"A": "B", "B": "A"}[m["party"]]
+        out.append((role, m["name"], v))
+    return out
 
 
 def in_scope_codes() -> list[int]:

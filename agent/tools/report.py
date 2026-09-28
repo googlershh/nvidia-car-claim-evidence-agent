@@ -39,6 +39,7 @@ def template_report(r: ClaimResult) -> str:
         f"- 다른 후보 유형: {', '.join(map(str, f.alternatives)) or '없음'}",
         f"- 영상 근거: {r.video.scene.get('evidence', '-')}",
         "- 수정요소(가감 요소): 담당자 확인 필요",
+        *[f"- 진술 대조({'피보험자' if c.source == 'insured' else '상대 보험사'}): {c.detail}" for c in r.statement_checks],
         "",
         "## 3. 손해액",
         f"- 사진상 손상 부위: {', '.join(d.parts) or '-'} (방향: {_dirs(d.directions)})",

@@ -9,7 +9,9 @@ from .schemas import ClaimBundle, ClaimResult, StageTrace
 from .tools.anomaly import check_consistency
 from .tools.damage import check_estimate
 from .tools.fault import search_fault_table
+from .tools.negotiation import draft_negotiation
 from .tools.routing import route
+from .tools.statements import compare_statements
 
 
 def run(bundle: ClaimBundle, backend: Backend) -> ClaimResult:
@@ -26,13 +28,16 @@ def run(bundle: ClaimBundle, backend: Backend) -> ClaimResult:
     stage("intake", lambda: _intake(bundle))
     video = stage("A.analyze_video", lambda: backend.video.analyze(bundle))
     fault = stage("A.search_fault_table", lambda: search_fault_table(video))
+    checks = stage("A.compare_statements", lambda: compare_statements(fault, bundle.statements))
     damage = stage("B.assess_damage", lambda: backend.damage.analyze(bundle))
     lines = stage("B.check_estimate", lambda: check_estimate(bundle.estimate, damage))
     anomalies = stage("C.check_consistency", lambda: check_consistency(fault, damage))
     decision = stage("route", lambda: route(fault, lines, anomalies))
     result = ClaimResult(case_id=bundle.case_id, backend=backend.name, video=video, fault=fault, damage=damage,
-                         lines=lines, anomalies=anomalies, decision=decision, report_md="", trace=trace)
+                         lines=lines, anomalies=anomalies, decision=decision, report_md="", trace=trace,
+                         statement_checks=checks)
     result.report_md = stage("draft", lambda: backend.writer.write(result))
+    result.negotiation_md = stage("draft_negotiation", lambda: draft_negotiation(result))
     return result
 
 

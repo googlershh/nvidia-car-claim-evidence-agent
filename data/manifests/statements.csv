@@ -1,0 +1,93 @@
+case_id,video_chart,insured_type,insured_claimed_chart,counterparty_type,counterparty_claimed_chart,counterparty_modifiers
+C001,차43-1,consistent,차43-1,modifier,차43-1,insured 현저한과실 +10
+C002,차32-1,consistent,차32-1,accept,차32-1,
+C003,차52-1,consistent,차52-1,modifier,차52-1,claimant 버스·택시 대중교통 승강장에서문열림 -20; insured 문열림의 예측가능성존재 +10
+C004,차43-4,self_serving,차43-3,accept,차43-4,
+C005,차47-1,consistent,차47-1,accept,차47-1,
+C006,차43-2,consistent,차43-2,alt_type,차43-2,
+C007,차43-1,consistent,차43-1,accept,차43-1,
+C008,차43-3,consistent,차43-3,accept,차43-3,
+C009,차52-1,consistent,차52-1,modifier,차52-1,insured 야간 +10
+C010,차41-1,consistent,차41-1,accept,차41-1,
+C011,차42-1,consistent,차42-1,modifier,차42-1,insured 야간·악천후등시야확보곤란 +10
+C012,차43-2,consistent,차43-2,alt_type,차43-4,
+C013,차43-1,consistent,차43-1,modifier,차43-1,insured 현저한과실 +10
+C014,차32-1,consistent,차32-1,modifier,차32-1,insured 올라가는차량 +10; insured 일방통행위반 +30
+C015,차45-5,consistent,차45-5,accept,차45-5,
+C016,차52-1,self_serving,차52-1,modifier,차52-1,insured 주행차로쪽문열림 +10; insured 신호불이행·지연 +10
+C017,차43-7(가),consistent,차43-7(가),alt_type,차43-7(나),
+C018,차47-1,consistent,차47-1,accept,차47-1,
+C019,차43-2,self_serving,차43-4,modifier,차43-2,insured 현저한과실 +10
+C020,차45-3,self_serving,차45-6,accept,차45-3,
+C021,차52-1,consistent,차52-1,modifier,차52-1,insured 야간 +10
+C022,차45-6,consistent,차45-6,accept,차45-6,
+C023,차42-1,self_serving,차41-1,accept,차42-1,
+C024,차43-3,self_serving,차43-4,modifier,차43-3,insured 전용차로위반 +10; insured 정체차로변경 +10
+C025,차52-1,consistent,차52-1,modifier,차52-1,insured 급박한문열림 +10; insured 야간 +10
+C026,차43-4,self_serving,차43-4,accept,차43-4,
+C027,차31-1,consistent,차31-1,modifier,차31-1,insured 현저한과실 +10
+C028,차41-1,self_serving,차41-1,accept,차41-1,
+C029,차42-1,consistent,차42-1,accept,차42-1,
+C030,차45-3,consistent,차45-3,modifier,차45-3,insured 현저한과실 +10
+C031,차45-6,self_serving,차45-5,accept,차45-6,
+C032,차47-1,consistent,차47-1,modifier,차47-1,insured 현저한과실 +10
+C033,차43-2,consistent,차43-2,alt_type,차43-4,
+C034,차2-2,consistent,차2-2,accept,차2-2,
+C035,차5-1(가),consistent,차5-1(가),accept,차5-1(가),
+C036,차6-1(가),consistent,차6-1(가),accept,차6-1(가),
+C037,차13-2,consistent,차13-2,accept,차13-2,
+C038,차4-1,consistent,차4-1,alt_type,차2-3,
+C039,차5-1(다),consistent,차5-1(다),alt_type,차6-1(다),
+C040,차3-1,consistent,차3-1,accept,차3-1,
+C041,차1-4,consistent,차1-4,alt_type,차3-5(가),
+C042,차1-1,consistent,차1-1,accept,차1-1,
+C043,차3-5(나),self_serving,차1-3,accept,차3-5(나),
+C044,차6-1(가),consistent,차6-1(가),accept,차6-1(가),
+C045,차33-1(가),consistent,차33-1(가),modifier,차33-1(가),claimant 회전종료 직후의사고(가) -10
+C046,차1-4,self_serving,차1-3,accept,차1-4,
+C047,차2-5(나),self_serving,차2-3,accept,차2-5(나),
+C048,차6-1(가),consistent,차6-1(가),modifier,차6-1(가),insured 소회전·대회전 +10
+C049,차2-5(가),consistent,차2-5(가),modifier,차2-5(가),insured (가)의경우에교차로 정체중진입 +10
+C050,차11-5,consistent,차11-5,accept,차11-5,
+C051,차47-1,consistent,차47-1,alt_type,차47-1,
+C052,차1-3,self_serving,차3-5(나),accept,차1-3,
+C053,차45-1,consistent,차45-1,accept,차45-1,
+C054,차2-6,self_serving,차2-6,accept,차2-6,
+C055,차33-1(가),consistent,차33-1(가),accept,차33-1(가),
+C056,차11-4,consistent,차11-4,accept,차11-4,
+C057,차2-2,consistent,차2-2,alt_type,차2-3,
+C058,차33-2(가),consistent,차33-2(가),modifier,차33-2(가),insured 신호불이행· 지연 +10; insured 대우회전 +10
+C059,차2-1,consistent,차2-1,accept,차2-1,
+C060,차1-1,consistent,차1-1,modifier,차1-1,insured 현저한과실 +10
+C061,차33-1(가),consistent,차33-1(가),modifier,차33-1(가),claimant 회전종료 직후의사고(가) -10
+C062,차13-2,consistent,차13-2,modifier,차13-2,insured 진로변경 신호불이행·지연 +10
+C063,차4-1,consistent,차4-1,modifier,차4-1,insured 좌회전직후차로변경 +10; claimant 명확한선진입 -10
+C064,차11-1(가),consistent,차11-1(가),alt_type,차11-4,
+C065,차3-5(나),consistent,차3-5(나),modifier,차3-5(나),insured (가)의경우에교차로 정체중진입 +10
+C066,차16-3,consistent,차16-3,modifier,차16-3,insured 서행불이행 +10; claimant 명확한선진입 -10
+C067,차13-1,consistent,차13-1,accept,차13-1,
+C068,차16-5,self_serving,차17-2,accept,차16-5,
+C069,차13-4,consistent,차13-4,accept,차13-4,
+C070,차13-3,consistent,차13-3,alt_type,차16-3,
+C071,차16-1,consistent,차16-1,accept,차16-1,
+C072,차17-1,consistent,차17-1,accept,차17-1,
+C073,차13-1,consistent,차13-1,modifier,차13-1,claimant 명확한선진입 -20
+C074,차17-1,self_serving,차13-1,accept,차17-1,
+C075,차16-3,consistent,차16-3,alt_type,차17-2,
+C076,차13-3,consistent,차13-3,modifier,차13-3,claimant 명확한선진입 -10; insured 대우회전 +10
+C077,차17-1,self_serving,차13-1,accept,차17-1,
+C078,차17-1,consistent,차17-1,modifier,차17-1,insured 좌회전방법위반 +10; insured 좌회전금지위반 +20
+C079,차16-3,consistent,차16-3,alt_type,차13-4,
+C080,차13-3,consistent,차13-3,modifier,차13-3,insured 서행불이행 +10
+C081,차13-1,consistent,차13-1,alt_type,차17-1,
+C082,차16-2,consistent,차16-2,accept,차16-2,
+C083,차16-3,consistent,차16-3,modifier,차16-3,insured 좌회전금지위반 +20
+C084,차16-1,self_serving,차16-2,accept,차16-1,
+C085,차16-3,consistent,차16-3,modifier,차16-3,insured 서행불이행 +10; claimant 좌회전완료직후 -30
+C086,차13-1,consistent,차13-1,accept,차13-1,
+C087,차16-2,consistent,차16-2,alt_type,차17-1,
+C088,차16-1,consistent,차16-1,alt_type,차16-2,
+C089,차13-3,self_serving,차17-2,modifier,차13-3,insured 서행불이행 +10; claimant 명확한선진입 -10
+C090,차13-1,consistent,차13-1,alt_type,차13-1,
+C091,차16-2,consistent,차16-2,modifier,차16-2,claimant 명확한선진입 -10
+C092,차16-1,self_serving,차16-2,alt_type,차16-2,

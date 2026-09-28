@@ -21,6 +21,7 @@ sys.path.insert(0, str(ROOT))
 from agent.backends import load_backend  # noqa: E402
 from agent.cases import iter_cases  # noqa: E402
 from agent.pipeline import run  # noqa: E402
+from agent.tools.negotiation import dispute_likelihood  # noqa: E402
 
 # per-case token guesses for the nim backend (docs/HANDOFF.md 5.3: ~5.2k for 8 frames + candidates)
 EST_TOKENS = {"video": 5_500, "damage": 4_000, "writer": 1_000}
@@ -43,6 +44,15 @@ def metrics(rows: list[dict]) -> dict:
     inj_tp = sum(len(set(r["flagged"]) & set(r["injected"])) for r in rows)
     ape = [abs(r["pred_approved"] - r["true_approved"]) / r["true_approved"] for r in rows if r["true_approved"]]
     by_type = Counter((r["case_type"], r["pred_route"]) for r in rows)
+
+    def pr(truth: str, pred: str, key_t: str, key_p: str) -> tuple:
+        tp = sum(r[key_t] == truth and r[key_p] == pred for r in rows)
+        t_n, p_n = sum(r[key_t] == truth for r in rows), sum(r[key_p] == pred for r in rows)
+        return (tp / t_n if t_n else None), (tp / p_n if p_n else None)
+
+    ins_rec, ins_prec = pr("self_serving", "contradicts", "true_insured", "pred_insured")
+    alt_rec, alt_prec = pr("alt_type", "contradicts", "true_counterparty", "pred_counterparty")
+    mod_rec, _ = pr("modifier", "needs_video", "true_counterparty", "pred_counterparty")
     return {
         "cases": n,
         "accident_type_top1": top1 / n, "accident_type_top3": top3 / n,
@@ -57,6 +67,10 @@ def metrics(rows: list[dict]) -> dict:
         "injected_precision": inj_tp / inj_flagged if inj_flagged else None,
         "approved_mape": sum(ape) / len(ape) if ape else None,
         "route_by_case_type": {f"{k[0]}->{k[1]}": v for k, v in sorted(by_type.items())},
+        "insured_self_serving_recall": ins_rec, "insured_self_serving_precision": ins_prec,
+        "counterparty_alt_type_recall": alt_rec, "counterparty_alt_type_precision": alt_prec,
+        "counterparty_modifier_flagged": mod_rec,
+        "dispute_likelihood": dict(sorted(Counter(r["dispute"] for r in rows).items())),
         "calls": sum(r["calls"] for r in rows), "tokens": sum(r["tokens"] for r in rows),
         "seconds": round(sum(r["seconds"] for r in rows), 1),
     }
@@ -86,11 +100,14 @@ def main() -> None:
 
     out = ROOT / "data" / "interim" / "eval" / args.backend
     (out / "reports").mkdir(parents=True, exist_ok=True)
+    (out / "letters").mkdir(parents=True, exist_ok=True)
     rows = []
     with (out / "results.jsonl").open("w", encoding="utf-8") as f:
         for bundle, truth in cases:
             res = run(bundle, backend)
             (out / "reports" / f"{bundle.case_id}.md").write_text(res.report_md, encoding="utf-8")
+            (out / "letters" / f"{bundle.case_id}.md").write_text(res.negotiation_md, encoding="utf-8")
+            verdict = {c.source: c.verdict for c in res.statement_checks}
             row = {
                 "case_id": bundle.case_id, "case_type": truth.case_type,
                 "true_code": truth.accident_type, "pred_code": res.fault.code, "pred_top3": res.video.top3,
@@ -101,6 +118,9 @@ def main() -> None:
                 "injected": truth.injected, "flagged": [c.line.name for c in res.lines if c.flagged],
                 "true_approved": truth.approved_total, "pred_approved": res.decision.approved_total,
                 "payout": res.decision.payout_estimate,
+                "true_insured": truth.insured_statement, "pred_insured": verdict.get("insured", ""),
+                "true_counterparty": truth.counterparty_claim, "pred_counterparty": verdict.get("counterparty", ""),
+                "dispute": dispute_likelihood(res)[0],
                 "calls": sum(t.calls for t in res.trace), "tokens": sum(t.tokens for t in res.trace),
                 "seconds": sum(t.seconds for t in res.trace),
             }

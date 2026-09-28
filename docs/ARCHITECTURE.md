@@ -9,8 +9,9 @@ ClaimBundle (영상, 사진, 견적서, [진술])
  │
  ├─ 0. intake        입력 검증, 개인정보 가드(번호판·얼굴·연락처 마스킹 대상 표시)
  │
- ├─ A. fault         analyze_video ─► search_fault_table ─► base fault + 근거
- │                   (영상 → 장면 JSON → 사고유형 top-3 → 코드표 기본과실)
+ ├─ A. fault         analyze_video ─► search_fault_table ─► compare_statements
+ │                   (영상 → 장면 JSON → 사고유형 top-3 → 인정기준 도표·현행 기본과실
+ │                    → 피보험자 진술·상대 보험사 주장 대조)
  │
  ├─ B. damage        assess_damage(사진) ─► parse_estimate ─► check_estimate
  │                   (사진 부위·방향 ↔ 견적 항목 대조 → 조정 대상 항목, 인정액)
@@ -20,7 +21,10 @@ ClaimBundle (영상, 사진, 견적서, [진술])
  │
  ├─ route            approve | adjust | siu  (+ 사유)
  │
- └─ draft            손해사정서 초안(한국어) / 조정 요청서 / SIU 이관 메모
+ ├─ draft            손해사정서 초안(한국어) / 조정 요청서 / SIU 이관 메모
+ │
+ └─ draft_negotiation 상대 보험사용 과실 협의 근거(도표 인용, 귀사 주장 검토, 수정요소 확인 대상,
+                     분쟁심의 가능성) + 내부용 피보험자 진술 대조
                      status = pending_approval  ← 담당자 승인(HITL)
 ```
 
@@ -49,8 +53,10 @@ ClaimBundle (영상, 사진, 견적서, [진술])
 | `parse_estimate` | 견적서 → 항목(이름·작업·금액·방향) | `aihub/estimates.py`, `aihub/parts.py` |
 | `check_estimate` | 사진 방향 ↔ 견적 항목 → 사진에 없는 방향의 교환·판금·수리 항목 | `aihub/parts.py` |
 | `check_consistency` | 청구 차량 충돌 방향 ↔ 사진 방향 → consistent / partial / contradiction | 위 두 표 |
+| `compare_statements` | 영상 판단(도표·기본과실) ↔ 각 진술의 주장 도표·과실 → consistent / contradicts(다른 도표 또는 역할 반대) / needs_video(수정요소 주장) | `agent/tools/statements.py` |
 | `route` | 이상징후·조정 항목 → approve / adjust / siu | 4절 규칙 |
 | `draft_report` | 전체 결과 → 한국어 사정서 초안 | 템플릿(오프라인) |
+| `draft_negotiation` | 전체 결과 → 상대 보험사용 협의 근거 문서, 분쟁심의 가능성(낮음·중간·높음, 규칙) | `agent/tools/negotiation.py`, 도표 수정요소 `data/interim/knia/charts.json` |
 
 ## 4. 라우팅 규칙 (초안)
 
@@ -72,6 +78,8 @@ ClaimBundle (영상, 사진, 견적서, [진술])
 | 라우팅 정확도, SIU 재현율·정밀도 | expected_route vs 예측 |
 | 과잉 항목 탐지 정밀도·재현율 | 주입 항목 vs 불인정 제안 항목 |
 | 인정액 오차 | 예측 인정액 vs `approved_total`(실제 손해사정 후 금액) |
+| 진술 대조 | 피보험자 self_serving → contradicts 재현율·정밀도, 상대 보험사 alt_type → contradicts, modifier → needs_video |
+| 분쟁심의 가능성 분포 | 낮음·중간·높음 건수 (정답 없음, 규칙 결과) |
 | 비용·지연 | trace의 호출 수·토큰·초 |
 
 **oracle 결과 (2026-09-28, 검수 통과 92건)**: 사고유형·청구 차량 역할·과실·SIU·과잉 항목 모두 1.000, **라우팅 0.924**, 인정액 MAPE 0.005. 라우팅 오답은 모두 정상 건의 실제 조정(아래와 같은 한계).

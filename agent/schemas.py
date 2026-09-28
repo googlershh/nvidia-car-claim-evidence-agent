@@ -25,13 +25,43 @@ class EstimateLine:
 
 
 @dataclass
+class Modifier:
+    party: str                       # claimant | insured (whose fault the value moves)
+    name: str                        # fault standard modifier, e.g. 진로변경 신호불이행·지연
+    value: int                       # added to that party's fault
+
+
+@dataclass
+class Statement:
+    """What one side says happened, as received for negotiation.
+
+    source: insured (our policyholder, the other car in the claim) or counterparty (the
+    claimant's insurer). The claim is assumed to arrive already summarised as a fault
+    standard chart and a ratio (how insurers exchange fault claims); reading free text into
+    a chart is a later model step.
+    """
+    source: str
+    text: str
+    claimed_chart: str               # e.g. 차43-2 or 차6-1(가)
+    claimed_insured_fault: int       # base fault the speaker claims for our insured, before modifiers
+    modifiers: list[Modifier] = field(default_factory=list)
+
+    @property
+    def claimed_total_insured_fault(self) -> int:
+        f = self.claimed_insured_fault
+        for m in self.modifiers:
+            f += m.value if m.party == "insured" else -m.value
+        return max(0, min(100, f))
+
+
+@dataclass
 class ClaimBundle:
     case_id: str
     video: Path                      # dashcam clip; claimant = filming vehicle = vehicle B
     photos: list[Path]               # damage photos of the claimant's car
     estimate: list[EstimateLine]     # repair shop estimate as submitted
     car_name: str = ""
-    statement: str = ""              # claimant statement (not in the AI Hub data yet)
+    statements: list[Statement] = field(default_factory=list)   # synthetic (scripts/build_statements.py)
 
 
 @dataclass
@@ -81,6 +111,16 @@ class FaultAssessment:
     @property
     def claimant_impact(self) -> set[str]:
         return self.impact_b if self.claimant_role == "B" else self.impact_a
+
+
+@dataclass
+class StatementCheck:
+    source: str                      # insured | counterparty
+    verdict: str                     # consistent | contradicts | needs_video (modifiers not yet checked)
+    claimed_chart: str
+    claimed_insured_fault: int       # after the claimed modifiers
+    detail: str
+    modifiers_to_verify: list[Modifier] = field(default_factory=list)
 
 
 @dataclass
@@ -134,5 +174,7 @@ class ClaimResult:
     anomalies: list[Anomaly]
     decision: Decision
     report_md: str
+    statement_checks: list[StatementCheck] = field(default_factory=list)
+    negotiation_md: str = ""         # evidence letter to the counterparty insurer (+ internal notes)
     status: str = "pending_approval"
     trace: list[StageTrace] = field(default_factory=list)

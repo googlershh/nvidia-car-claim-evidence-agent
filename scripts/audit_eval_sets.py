@@ -247,10 +247,50 @@ def audit_media() -> None:
     check(images <= have, f"all {len(images)} synthetic-case images extracted (missing {sorted(images - have)[:3]})")
 
 
+def audit_statements() -> None:
+    print("\n[3b] synthetic statements vs cases and the chart mapping")
+    path = INTERIM / "statements.jsonl"
+    if not path.exists():
+        check(False, "statements.jsonl exists (run scripts/build_statements.py)")
+        return
+    stm = {s["case_id"]: s for s in map(json.loads, path.open(encoding="utf-8"))}
+    cases = {c["case_id"]: c for c in map(json.loads, (INTERIM / "synth_cases.jsonl").open(encoding="utf-8"))}
+    manifest = {r["case_id"]: r for r in csv.DictReader((ROOT / "data" / "manifests" / "statements.csv").open(encoding="utf-8"))}
+    charts = {int(r["code"]): r for r in csv.DictReader((ROOT / "data" / "reference" / "code_to_chart.csv").open(encoding="utf-8"))}
+    check(set(stm) == set(cases) == set(manifest), f"one statement pair per case ({len(stm)}), manifest ids match")
+
+    def label(code: int) -> str:
+        return charts[code]["chart"] + (f"({charts[code]['variant']})" if charts[code]["variant"] else "")
+
+    def insured_fault(code: int, claimant: str) -> int:
+        return int(charts[code]["chart_fault_b" if claimant == "A" else "chart_fault_a"])
+
+    bad = []
+    for cid, s in stm.items():
+        c = cases[cid]
+        code, claimant = int(c["video"]["accident_type"]), c["claimant"]
+        base = insured_fault(code, claimant)
+        ins, cp = {x["source"]: x for x in s["statements"]}["insured"], {x["source"]: x for x in s["statements"]}["counterparty"]
+        same_ins = (ins["claimed_chart"], ins["claimed_insured_fault"]) == (label(code), base)
+        same_cp = (cp["claimed_chart"], cp["claimed_insured_fault"]) == (label(code), base)
+        ok = (s["video_chart"] == label(code) and s["base_insured_fault"] == base
+              and (ins["truth"] == "consistent") == same_ins and not ins["modifiers"]
+              and (ins["truth"] != "self_serving" or ins["claimed_insured_fault"] < base)
+              and (cp["truth"] == "alt_type") == (not same_cp)
+              and (cp["truth"] == "modifier") == bool(cp["modifiers"])
+              and (cp["truth"] != "alt_type" or cp["claimed_insured_fault"] > base)
+              and manifest[cid]["insured_type"] == ins["truth"] and manifest[cid]["counterparty_type"] == cp["truth"])
+        if not ok:
+            bad.append(cid)
+    check(not bad, f"statement types follow the rule: consistent/accept = video chart and base fault, "
+                   f"self_serving/alt_type = other chart or roles with a lower fault for the speaker ({bad[:3]})")
+
+
 def main() -> None:
     raw = raw_video_labels()
     audit_fault_set(raw)
     audit_synth(raw)
+    audit_statements()
     audit_leakage()
     audit_media()
     print(f"\n{'ALL CHECKS PASSED' if not failures else f'{len(failures)} FAILED'}")
