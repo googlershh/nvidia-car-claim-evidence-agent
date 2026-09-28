@@ -30,7 +30,7 @@ npm run preview --prefix demo
 
 | 설정 | 값 |
 |---|---|
-| Worker 이름 | `case-note-demo` |
+| Worker 이름 | `nvidia-car-claim-evidence-agent` |
 | Production branch | `main` |
 | Root directory | `demo` |
 | Build command | `npm ci && npm ci --prefix editor && npm run build` |
@@ -53,7 +53,7 @@ GitHub Actions에서 빌드·브라우저 검증을 통과한 정적 번들을 W
 3. GitHub 저장소 → **Settings → Secrets and variables → Actions**에 등록합니다.
    - **Variables**: `CLOUDFLARE_ACCOUNT_ID`
    - **Secrets**: `CLOUDFLARE_API_TOKEN` (토큰을 코드나 대화에 붙여 넣지 않습니다.)
-4. 데모 PR을 `main`에 병합합니다. `Case demo — build and deploy`가 `case-note-demo` Worker를 생성/갱신합니다.
+4. 데모 PR을 `main`에 병합합니다. `Case demo — build and deploy`가 `nvidia-car-claim-evidence-agent` Worker를 생성/갱신합니다.
 5. 이미 병합한 뒤 계정을 설정했다면 **Actions → Case demo — build and deploy → Run workflow → main**으로 실행합니다.
 
 계정 ID가 미설정이면 검증과 번들 생성까지 실행하고 배포 작업은 건너뜁니다. PR에서는 배포 토큰을 사용하지 않습니다. 성공한 배포 로그에 실제 `workers.dev` 주소가 표시됩니다.
