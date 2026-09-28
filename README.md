@@ -133,6 +133,7 @@ OpenClaw 대시보드 주소는 `nemoclaw demo dashboard-url --quiet`로 얻고,
 ```
 agent/          에이전트 도구(cli.py), 파이프라인, 도구 모듈(tools/)
 aihub/          AI Hub 원본 파서
+demo/           담당자 화면 데모 '사건노트'(정적 사이트, Workers 배포, demo/README.md)
 skills/         OpenClaw 스킬 claim-evidence
 scripts/        데이터 다운로드·생성·감사, brev/ GPU 인스턴스 구성
 eval/           평가 실행과 지표
@@ -152,3 +153,4 @@ docs/           설계, 검수, 조사 문서, submission/ 제출 자료
 | [docs/LABEL_REVIEW.md](docs/LABEL_REVIEW.md) | 평가 영상 150건 검수 |
 | [docs/ROI_EVIDENCE.md](docs/ROI_EVIDENCE.md) | 현업 조사, 통계, 분쟁 원인 연구 |
 | [scripts/brev/README.md](scripts/brev/README.md) | GPU 인스턴스 구성 절차와 막힌 점 |
+| [demo/README.md](demo/README.md) | 담당자 화면 데모 실행·배포 |
