@@ -6,8 +6,8 @@
 
 ## 2. 서비스 파일 (또는 배포 URL)
 
-- GitHub 저장소: `https://github.com/<계정>/<저장소>` (저장소 생성 후 기입)
-- 제출 파일: `NVIDIA 해커톤_<팀명>_협의 근거 에이전트.pdf` (한 페이지 소개서 + 스택 다이어그램 + 저장소 링크)
+- GitHub 저장소: https://github.com/googlershh/nvidia-car-claim-evidence-agent (현재 비공개, 제출 전 공개 전환 필요)
+- 제출 파일: `docs/submission/NVIDIA 해커톤_종지_협의 근거 에이전트.pdf` (한 페이지 소개서 + 스택 다이어그램 + 저장소 링크)
 
 ## 3. 해결하고자 했던 문제 (Problem Definition)
 
@@ -39,4 +39,4 @@
 
 ## 6. [선택] 추가 URL
 
-- GitHub 저장소 README(스택 다이어그램 포함): 저장소 생성 후 기입
+- GitHub 저장소 README(스택 다이어그램 포함): https://github.com/googlershh/nvidia-car-claim-evidence-agent#readme
