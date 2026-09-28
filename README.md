@@ -39,7 +39,11 @@ NVIDIA Agentic AI Hackathon 출품작 · 팀 종지 · 소개서 PDF: [docs/subm
 
 ## 아키텍처
 
-![스택 다이어그램](docs/assets/stack.svg)
+![에이전트·비디오 파이프라인](docs/assets/stack.svg)
+
+**NVIDIA 스택 구성** — 담당자 → NemoClaw 에이전트 → 도구 5종 → 모델·데이터 계층
+
+![NVIDIA 스택 구성](docs/assets/nvidia_stack.svg)
 
 | 구성요소 | 이 프로젝트에서 한 일 | 근거 |
 |---|---|---|
