@@ -49,7 +49,7 @@ class FaultAssessment:
     situation: str
     a_progress: str
     b_progress: str
-    fault_a: int                     # table vehicle A
+    fault_a: int                     # table vehicle A, current (10th edition) base fault
     fault_b: int                     # table vehicle B
     alternatives: list[int]
     impact_a: set[str]
@@ -58,6 +58,8 @@ class FaultAssessment:
     # The claimant is the filming car. The dataset manual says it is vehicle B, but the
     # label review found 19 of 92 usable clips where it is vehicle A (docs/LABEL_REVIEW.md).
     claimant_role: str = "B"
+    chart: str = ""                  # fault standard chart, e.g. 차43-2 or 차1-2(가)
+    chart_mapping: str = ""          # same | revised (10th edition value differs from AI Hub) | uncertain | none
 
     @property
     def claimant_fault(self) -> int:

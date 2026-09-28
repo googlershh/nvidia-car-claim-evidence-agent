@@ -8,6 +8,10 @@ Outputs:
                                            variant, modifiers, old (9th edition) numbers. Not in git.
     data/reference/code_to_chart.csv       code -> chart, variant, A/B orientation, applied modifier,
                                            and whether the chart reproduces the AI Hub base fault.
+                                           mapping: same (reproduced) | revised (10th edition changed the
+                                           value; the chart value is the current one) | uncertain.
+                                           chart_fault_a/b is the current (10th edition) base fault and is
+                                           the fault ground truth of the reviewed eval set.
 
 The mapping itself (MAP below) was made by reading each chart. The script re-derives the
 expected fault from the chart text so every row is checked, not asserted.
@@ -35,6 +39,7 @@ RAW = ROOT / "data" / "interim" / "knia" / "standard_raw.txt"
 CHARTS = ROOT / "data" / "interim" / "knia" / "charts.json"
 OUT = ROOT / "data" / "reference" / "code_to_chart.csv"
 
+UNCERTAIN = {89}   # no chart clearly matches; kept for reference, fault not scored
 T = "삼거리"  # T-junction modifier ("삼거리(T자) 회전/좌회전 +10"): the 10th edition merged the
               # separate T-junction charts of the 9th edition into the cross-road charts
 
@@ -192,7 +197,8 @@ def main() -> None:
         exp_a, exp_b = (fb, fa) if swap else (fa, fb)
         r = ko[code]
         match = (exp_a, exp_b) == (int(r["fault_a"]), int(r["fault_b"]))
-        rows.append({"code": code, "place": r["place_key"], "chart": chart, "variant": variant,
+        mapping = "uncertain" if code in UNCERTAIN else "same" if match else "revised"
+        rows.append({"code": code, "place": r["place_key"], "chart": chart, "variant": variant, "mapping": mapping,
                      "swap_ab": int(swap), "applied_modifiers": "; ".join(applied),
                      "chart_fault_a": exp_a, "chart_fault_b": exp_b,
                      "aihub_fault_a": r["fault_a"], "aihub_fault_b": r["fault_b"], "fault_match": int(match),

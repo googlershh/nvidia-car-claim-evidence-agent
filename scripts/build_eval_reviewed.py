@@ -14,6 +14,11 @@ data/manifests/label_review.csv (tracked in git, no scene descriptions):
 Output data/interim/eval_fault_reviewed.csv = eval_fault.csv rows with use=1 plus
 ego_role, ego_fault (claimant's base fault) and other_fault.
 
+Fault ground truth is the current fault standard (10th edition, 2023), not the AI Hub
+label (9th edition): fault_a/fault_b come from data/reference/code_to_chart.csv
+(scripts/build_chart_map.py), the AI Hub values are kept as aihub_fault_a/b. Codes
+whose chart is uncertain get fault_scored=0 (type and role are still scored).
+
 Usage:
     python scripts/build_eval_reviewed.py                  # build from the manifest
     python scripts/build_eval_reviewed.py --export-review  # (re)write the manifest from
@@ -24,10 +29,15 @@ from __future__ import annotations
 
 import argparse
 import csv
+import sys
 from collections import Counter
 from pathlib import Path
 
 ROOT = Path(__file__).resolve().parents[1]
+sys.path.insert(0, str(ROOT))
+
+from agent.tools.fault import chart_map  # noqa: E402
+
 INTERIM = ROOT / "data" / "interim"
 MANIFEST = ROOT / "data" / "manifests" / "label_review.csv"
 REVIEW = INTERIM / "label_review" / "review.csv"
@@ -73,6 +83,7 @@ def main() -> None:
     rows = read_csv(INTERIM / "eval_fault.csv")
     if set(review) != {r["eval_id"] for r in rows}:
         raise SystemExit("label_review.csv and eval_fault.csv cover different clips")
+    charts = chart_map()
     out = []
     for r in rows:
         v = review[r["eval_id"]]
@@ -81,9 +92,13 @@ def main() -> None:
         if v["use"] != "1":
             continue
         role = v["ego_role"]
-        ego, other = (r["fault_b"], r["fault_a"]) if role == "B" else (r["fault_a"], r["fault_b"])
-        out.append({**r, "ego_role": role, "ego_fault": ego, "other_fault": other,
-                    "review_verdict": v["verdict"], "review_confidence": v["confidence"]})
+        ch = charts[int(r["accident_type"])]
+        fa, fb = ch["chart_fault_a"], ch["chart_fault_b"]
+        ego, other = (fb, fa) if role == "B" else (fa, fb)
+        out.append({**r, "aihub_fault_a": r["fault_a"], "aihub_fault_b": r["fault_b"], "fault_a": fa, "fault_b": fb,
+                    "chart": ch["chart"] + (f"({ch['variant']})" if ch["variant"] else ""), "chart_mapping": ch["mapping"],
+                    "fault_scored": int(ch["mapping"] != "uncertain"), "ego_role": role, "ego_fault": ego,
+                    "other_fault": other, "review_verdict": v["verdict"], "review_confidence": v["confidence"]})
     with OUT.open("w", encoding="utf-8-sig", newline="") as f:
         w = csv.DictWriter(f, fieldnames=list(out[0]))
         w.writeheader()
@@ -91,6 +106,7 @@ def main() -> None:
     print(f"wrote {OUT.relative_to(ROOT)}: {len(out)} clips")
     print("  by place", dict(Counter(r["zip_place"] for r in out)))
     print("  ego role", dict(Counter(r["ego_role"] for r in out)))
+    print("  fault vs AI Hub", dict(Counter(r["chart_mapping"] for r in out)))
     print("  excluded", dict(Counter(v["exclude_reason"].split(" of ")[0] for v in review.values() if v["use"] != "1")))
 
 

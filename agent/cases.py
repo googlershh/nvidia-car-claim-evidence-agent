@@ -22,13 +22,14 @@ class GroundTruth:
     case_type: str                   # normal | inflated | contradiction
     expected_route: str              # approve | adjust | siu
     accident_type: int
-    fault_a: int
+    fault_a: int                     # current fault standard (10th edition) base fault
     fault_b: int
     photo_parts: list[str]           # damage-label repair parts (what the photos show)
     injected: list[str]              # names of injected estimate lines
     approved_total: int              # loss adjuster's approved amount (items, before VAT)
     real_adjusted: bool
     claimant_role: str = "B"         # table vehicle of the filming car, from the label review
+    fault_scored: bool = True        # False when no fault standard chart clearly matches the code
 
     @property
     def claimant_fault(self) -> int:
@@ -65,7 +66,7 @@ def to_bundle(case: dict) -> tuple[ClaimBundle, GroundTruth]:
         accident_type=int(video["accident_type"]), fault_a=int(video["fault_a"]), fault_b=int(video["fault_b"]),
         photo_parts=list(case["photo_parts"]), injected=[i["name"] for i in case["injected_items"]],
         approved_total=int(case["approved_total"]), real_adjusted=bool(case["real_adjusted"]),
-        claimant_role=case.get("claimant", "B"),
+        claimant_role=case.get("claimant", "B"), fault_scored=bool(int(video.get("fault_scored", 1))),
     )
     return bundle, truth
 

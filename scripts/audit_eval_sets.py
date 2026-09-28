@@ -149,6 +149,13 @@ def audit_synth(raw_videos: dict[str, dict]) -> None:
     check(all(int(c["video"]["ego_fault"]) == int(c["video"]["fault_b" if c["claimant"] == "B" else "fault_a"])
               and int(c["video"]["ego_fault"]) + int(c["video"]["other_fault"]) == 100 for c in cases),
           "claimant fault = fault of the claimant's role, shares sum to 100")
+    charts = {int(r["code"]): r for r in csv.DictReader((ROOT / "data" / "reference" / "code_to_chart.csv").open(encoding="utf-8"))}
+    ch = [charts[int(c["video"]["accident_type"])] for c in cases]
+    check(all((int(c["video"]["fault_a"]), int(c["video"]["fault_b"])) == (int(x["chart_fault_a"]), int(x["chart_fault_b"]))
+              and (int(c["video"]["aihub_fault_a"]), int(c["video"]["aihub_fault_b"])) == (int(x["aihub_fault_a"]), int(x["aihub_fault_b"]))
+              for c, x in zip(cases, ch)), "fault = current standard chart (code_to_chart.csv), AI Hub fault kept alongside")
+    check(all(int(c["video"]["fault_scored"]) == int(x["mapping"] != "uncertain") for c, x in zip(cases, ch)),
+          f"fault not scored only for uncertain charts ({sum(x['mapping'] == 'uncertain' for x in ch)} cases)")
     check(all(c["accident_id"].startswith("sc-") for c in cases), "all SOCAR (sc-) accidents")
 
     ids = {c["accident_id"] for c in cases}

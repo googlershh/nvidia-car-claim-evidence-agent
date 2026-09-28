@@ -44,7 +44,7 @@ ClaimBundle (영상, 사진, 견적서, [진술])
 
 | 도구 | 입력 → 출력 | 근거 자료 |
 |---|---|---|
-| `search_fault_table` | 사고유형 코드 → 장소·상황·진행방향·기본과실 | `data/interim/accident_codes.csv`, 영어판 `data/reference/accident_codes_en.csv` |
+| `search_fault_table` | 사고유형 코드 → 인정기준 도표(제10차 개정)·현행 기본과실·장소·진행방향, 도표 대응 불확실 표시 | `data/reference/code_to_chart.csv`, `data/interim/accident_codes.csv`, 영어판 `data/reference/accident_codes_en.csv` |
 | `impact_directions` | 사고유형 → A·B 충돌 가능 방향, 신뢰도 | `data/reference/collision_areas.csv` |
 | `parse_estimate` | 견적서 → 항목(이름·작업·금액·방향) | `aihub/estimates.py`, `aihub/parts.py` |
 | `check_estimate` | 사진 방향 ↔ 견적 항목 → 사진에 없는 방향의 교환·판금·수리 항목 | `aihub/parts.py` |

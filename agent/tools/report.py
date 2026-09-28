@@ -34,7 +34,8 @@ def template_report(r: ClaimResult) -> str:
         f"- 상대 차량({'A' if f.claimant_role == 'B' else 'B'}, 당사 피보험자): {f.other_progress}",
         f"- 청구 차량({f.claimant_role}, 블랙박스 촬영 차량): {f.claimant_progress}",
         f"- 기본 과실비율 상대:청구 = **{f.other_fault}:{f.claimant_fault}** "
-        f"(과실비율 인정기준 기본과실, 수정요소 미반영. 도표 A:B = {f.fault_a}:{f.fault_b})",
+        f"(과실비율 인정기준 제10차 개정 도표 {f.chart or '-'} 기본과실, 수정요소 미반영. 도표 A:B = {f.fault_a}:{f.fault_b})",
+        *(["- **도표 대응 불확실: 담당자가 적용 도표를 확인해야 함**"] if f.chart_mapping in ("uncertain", "none") else []),
         f"- 다른 후보 유형: {', '.join(map(str, f.alternatives)) or '없음'}",
         f"- 영상 근거: {r.video.scene.get('evidence', '-')}",
         "- 수정요소(가감 요소): 담당자 확인 필요",
